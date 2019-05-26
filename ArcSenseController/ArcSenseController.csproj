@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{30B4204B-5617-429E-9A23-E4A3492C1ED7}</ProjectGuid>
+    <OutputType>winmdobj</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ArcSenseController</RootNamespace>
+    <AssemblyName>ArcSenseController</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion>10.0.17763.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <AllowCrossPlatformRetargeting>false</AllowCrossPlatformRetargeting>
+    <PackageCertificateKeyFile>ArcSenseController_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <AppxPackage>true</AppxPackage>
+    <ContainsStartupTask>true</ContainsStartupTask>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Models\Data\SensorDataAdapter.cs" />
+    <Compile Include="Models\Data\Transport\BluetoothTransport.cs" />
+    <Compile Include="Models\Sensor\Impl\As7262\As7262ChannelGain.cs" />
+    <Compile Include="Models\Sensor\Impl\As7262\As7262ChannelType.cs" />
+    <Compile Include="Models\Sensor\Impl\As7262\As7262ConversionType.cs" />
+    <Compile Include="Models\Sensor\Impl\As7262\As7262DriverCurrentLimit.cs" />
+    <Compile Include="Models\Sensor\Impl\As7262\AS7262IndicatorCurrentLimit.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680GasResistSensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680HeaterProfileSetPoints.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680HumidityOversamplings.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680HumiditySensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680IirFilterCoefficients.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680OperationModes.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680PressureOversamplings.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680Sensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680PressureSensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680Registers.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680TemperatureOversamplings.cs" />
+    <Compile Include="Models\Sensor\Impl\Bme680\Bme680TemperatureSensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DAccelerometer.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DAccelerometerFilterBandwidth.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DAccelerometerScale.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DMagnetometer.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DMagnetometerDataRate.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DAccelerometerDataRate.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DMagnetometerMode.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DMagnetometerResolution.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DMagnetometerScale.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DSensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Lsm303D\Lsm303DRegisters.cs" />
+    <Compile Include="Models\Sensor\Types\ISensor.cs" />
+    <Compile Include="Models\Sensor\Sensor.cs" />
+    <Compile Include="Models\Sensor\Sensor`T.cs" />
+    <Compile Include="Models\Sensor\Types\IAccelerometerSensor.cs" />
+    <Compile Include="Models\Sensor\Types\IMagnetometerSensor.cs" />
+    <Compile Include="Models\Sensor\Types\IGasResistanceSensor.cs" />
+    <Compile Include="Models\Sensor\Types\IHumiditySensor.cs" />
+    <Compile Include="Models\Sensor\I2CSensor.cs" />
+    <Compile Include="Models\Sensor\Types\IPressureSensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Gmc320\Gmc320Keys.cs" />
+    <Compile Include="Models\Sensor\Types\IGeigerSensor.cs" />
+    <Compile Include="Models\Sensor\Impl\Gmc320\Gmc320Sensor.cs" />
+    <Compile Include="Models\Sensor\SerialSensor.cs" />
+    <Compile Include="Models\Sensor\Impl\As7262\As7262Sensor.cs" />
+    <Compile Include="Models\Sensor\Types\ISpectralSensor.cs" />
+    <Compile Include="Models\Sensor\Types\ITemperatureSensor.cs" />
+    <Compile Include="Services\SensorService.cs" />
+    <Compile Include="StartupTask.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <None Include="ArcSenseController_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\Default.rd.xml" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png">
+      <InProject>false</InProject>
+    </Content>
+    <Content Include="Assets\SplashScreen.scale-200.png">
+      <InProject>false</InProject>
+    </Content>
+    <Content Include="Assets\Square150x150Logo.scale-200.png">
+      <InProject>false</InProject>
+    </Content>
+    <Content Include="Assets\Square44x44Logo.scale-200.png">
+      <InProject>false</InProject>
+    </Content>
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <InProject>false</InProject>
+    </Content>
+    <Content Include="Assets\StoreLogo.png">
+      <InProject>false</InProject>
+    </Content>
+    <Content Include="Assets\Wide310x150Logo.scale-200.png">
+      <InProject>false</InProject>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions">
+      <Version>2.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>6.2.8</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Sensor\Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArcDataCore\ArcDataCore.csproj">
+      <Project>{e9dfe87c-f0d4-45d0-b16a-1c6e5de59910}</Project>
+      <Name>ArcDataCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '15.0' ">
+    <VisualStudioVersion>15.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

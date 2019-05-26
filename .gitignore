@@ -1,0 +1,12 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/ArcSense
+/ArcDataCore/bin/Debug/netstandard2.0
+/ArcDataCore/obj
+/ArcSenseView/bin/Debug
+/Debug
+/ArcSenseController/bin
+/ArcSenseController/obj
+/ArcSenseView/obj
