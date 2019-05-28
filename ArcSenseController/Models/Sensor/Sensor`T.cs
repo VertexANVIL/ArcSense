@@ -12,10 +12,10 @@ namespace ArcSenseController.Models.Sensor
     /// Represents a sensor that is a subset of a master driver.
     /// </summary>
     /// <typeparam name="T">The type of the driver.</typeparam>
-    internal abstract class Sensor<T> : Sensor where T: ISensor
+    internal abstract class SubSensor<T> : Sensor where T: ISensor
     {
         protected readonly T Driver;
-        internal Sensor(T driver)
+        internal SubSensor(T driver)
         {
             Driver = driver;
         }

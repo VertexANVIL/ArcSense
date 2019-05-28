@@ -5,7 +5,7 @@ using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Lsm303D
 {
-    internal class Lsm303DAccelerometer : Sensor<Lsm303DSensor>, IAccelerometerSensor
+    internal sealed class Lsm303DAccelerometer : SubSensor<Lsm303DSensor>, IAccelerometerSensor
     {
         internal Lsm303DAccelerometerDataRate DataRate = Lsm303DAccelerometerDataRate.Rate400Hz;
         internal Lsm303DAccelerometerFilterBandwidth Bandwidth = Lsm303DAccelerometerFilterBandwidth.Bandwidth194Hz;

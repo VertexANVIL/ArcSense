@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ArcDataCore;
+using ArcDataCore.Models.Sensor;
+using ArcDataCore.Source;
 using ArcSenseController.Models.Sensor.Types;
+using ArcSenseController.Services;
+using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArcSenseController.Models.Data
 {
@@ -15,36 +21,117 @@ namespace ArcSenseController.Models.Data
         /// <summary>
         /// Interval in milliseconds in which polling should take place.
         /// </summary>
-        private const int PollInterval = 1000;
+        private const int POLL_INTERVAL = 1000;
 
         /// <summary>
         /// Represents all sensors registered on this adapter instance.
         /// </summary>
-        private readonly ICollection<ISensor> _sensors;
+        private readonly IList<ISensor> _sensors;
 
         /// <summary>
         /// Represents the data source that data should be sent to.
         /// </summary>
-        private readonly IDataSourceService _source;
+        private readonly IDataSourceService _service;
 
-        private readonly Timer _timer;
+        private Timer _timer;
+        private readonly object _timerLock = new object();
 
-        public SensorDataAdapter(IDataSourceService service, ICollection<ISensor> sensors)
+        public SensorDataAdapter(IServiceProvider services)
         {
-            _sensors = sensors;
-            _timer = new Timer(PollSensors, null, 0, PollInterval);
+            _service = services.GetService<IDataSourceService>();
+            _sensors = services.GetServices<ISensor>().ToList();
+        }
+
+        public void Start()
+        {
+            _timer = new Timer(PollSensors, null, 0, POLL_INTERVAL);
         }
 
         private void PollSensors(object state)
         {
-            foreach (var sensor in _sensors) Poll(sensor);
+            // STOP the timer until we are finished
+            if (!Monitor.TryEnter(_timerLock)) return;
+
+            try
+            {
+                var now = DateTime.UtcNow;
+                var list = new List<SensorData>();
+
+                var sw = new Stopwatch();
+                sw.Start();
+                foreach (var sensor in _sensors) Poll(sensor, list);
+                sw.Stop();
+
+                _service.Commit(new SensorDataPackage(now, list.ToArray()));
+                Debug.WriteLine($"Full sensor poll completed in {sw.ElapsedMilliseconds} ms.");
+            }
+            catch (Exception e)
+            {
+                // TOOD: write some exception text
+                throw;
+            }
+            finally
+            {
+                Monitor.Exit(_timerLock);
+            }
         }
 
-        private void Poll(ISensor sensor)
+        /// <summary>
+        /// Polls a sensor.
+        /// </summary>
+        /// <param name="sensor">The sensor to use.</param>
+        /// <param name="dest">The destination collection to add the data to.</param>
+        private void Poll(ISensor sensor, ICollection<SensorData> dest)
         {
-            var model = (int) sensor.Model;
+            var list = new List<(byte[], SensorDataType)>();
 
-            
+            var sw = new Stopwatch();
+            sw.Start();
+
+            // Run the sensor measurements (if required)
+            if (sensor is IMeasuringSensor measure) measure.Measure();
+
+            // Read the data from the sensor (if required)
+            switch (sensor)
+            {
+                case IAccelerometerSensor accelerometer:
+                    list.Add((accelerometer.Acceleration, SensorDataType.Accelerometer3D));
+                    break;
+                case IMagnetometerSensor magnetometer:
+                    list.Add((magnetometer.Flux, SensorDataType.Magnetometer3D));
+                    break;
+                case IGasResistanceSensor gasResist:
+                    list.Add((BitConverter.GetBytes(gasResist.Resistance), SensorDataType.GasResistance));
+                    break;
+                case IHumiditySensor humidity:
+                    list.Add((BitConverter.GetBytes(humidity.Humidity), SensorDataType.RelativeHumidity));
+                    break;
+                case IPressureSensor pressure:
+                    list.Add((BitConverter.GetBytes(pressure.Pressure), SensorDataType.Pressure));
+                    break;
+                case ITemperatureSensor temperature:
+                    list.Add((BitConverter.GetBytes(temperature.Temperature), SensorDataType.Temperature));
+                    break;
+                case ISpectralSensor spectral:
+                    list.Add((MessagePackSerializer.Serialize(spectral.Spectrum), SensorDataType.Temperature));
+                    break;
+                case IGeigerSensor geiger:
+                    list.Add((BitConverter.GetBytes(geiger.GetCpm()), SensorDataType.RadiationCpm));
+                    break;
+            }
+
+            sw.Stop();
+
+            //Debug.WriteLine($"Read sensor {sensor.Model} in {sw.ElapsedMilliseconds} ms at {now}");
+
+            // Commit all
+            foreach (var (bytes, dataType) in list)
+            {
+                dest.Add(new SensorData(dataType, sensor.Model, bytes));
+            }
+
+            // Enforce a mandatory delay of 10ms between polls, to prevent I2C lockups
+            Task.Delay(10).Wait();
         }
     }
 }

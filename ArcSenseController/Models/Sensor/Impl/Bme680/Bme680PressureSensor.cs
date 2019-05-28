@@ -4,7 +4,7 @@ using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Bme680
 {
-    internal class Bme680PressureSensor : Sensor<Bme680Sensor>, IPressureSensor
+    internal sealed class Bme680PressureSensor : SubSensor<Bme680Sensor>, IPressureSensor
     {
         /// <summary>
         /// Pressure oversampling.
@@ -82,8 +82,6 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// <returns>Pressure in Pa.</returns>
         private double GetPressure()
         {
-            Driver.ForceRead();
-
             var adc = Driver.ReadRegister_OneByte(Bme680Registers.PressMsb) * 4096;
             adc += Driver.ReadRegister_OneByte(Bme680Registers.PressLsb) * 16;
             adc += Driver.ReadRegister_OneByte(Bme680Registers.PressXlsb) / 16;

@@ -4,7 +4,7 @@ using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Bme680
 {
-    internal class Bme680GasResistSensor : Sensor<Bme680Sensor>, IGasResistanceSensor
+    internal sealed class Bme680GasResistSensor : SubSensor<Bme680Sensor>, IGasResistanceSensor
     {
         /// <summary>
         /// Gas sensor heat duration in ms. Max value is 252.
@@ -45,11 +45,11 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
             await Task.Delay(1);
 
             // Define heater-on time.
-            Driver.Device.Write(new[] { (byte)Bme680Registers.GasWait0, CalculateHeatDuration(HeatDuration) });
+            Driver.WriteRegister(new[] { (byte)Bme680Registers.GasWait0, CalculateHeatDuration(HeatDuration) });
             await Task.Delay(1);
 
             // Set heater temperature.
-            Driver.Device.Write(new[] { (byte)Bme680Registers.ResHeat0, CalculateHeaterResistance(HeatTemperature) });
+            Driver.WriteRegister(new[] { (byte)Bme680Registers.ResHeat0, CalculateHeaterResistance(HeatTemperature) });
             await Task.Delay(1);
         }
 
@@ -117,7 +117,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// Turns gas measurement on of off.
         /// </summary>
         /// <param name="state">Gas measurement mode. True for on, false for off.</param>
-        private void SetGasMeasurement(bool state)
+        internal void SetGasMeasurement(bool state)
         {
             var configValue = Driver.ReadRegister_OneByte(Bme680Registers.CtrlGas1);
 
@@ -126,7 +126,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
             else
                 configValue &= 0b11101111;
 
-            Driver.Device.Write(new[] { (byte)Bme680Registers.CtrlGas1, configValue });
+            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlGas1, configValue });
         }
 
         /// <summary>
@@ -135,14 +135,14 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// <param name="heaterProfileSetPoint">Heater profile set-point.</param>
         private void SelectHeaterProfileSetPoint(Bme680HeaterProfileSetPoints heaterProfileSetPoint)
         {
-            Driver.Device.Write(new[] { (byte)Bme680Registers.CtrlGas1, (byte)heaterProfileSetPoint });
+            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlGas1, (byte)heaterProfileSetPoint });
         }
 
         /// <summary>
         /// Gets the gas measurement running status from the gas_measuring bit.
         /// </summary>
         /// <returns>True if gas measurement is running. False if not.</returns>
-        private bool GetGasMeasuringStatus()
+        internal bool GetGasMeasuringStatus()
         {
             var readValue = Driver.ReadRegister_OneByte(Bme680Registers.EasStatus0);
             return (readValue & 0b01000000) == 0b01000000;
@@ -162,23 +162,12 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
             return result;
         }
 
-        private void ForceGasRead()
-        {
-            SetGasMeasurement(true);
-            Driver.ForceRead();
-
-            while (GetGasMeasuringStatus())
-                Task.Delay(1).Wait();
-        }
-
         /// <summary>
         /// Reads the gas resistance.
         /// </summary>
         /// <returns>Gas resistance in Ohms.</returns>
         private double ReadGasResistance()
         {
-            ForceGasRead();
-
             var tempAdc = Driver.ReadRegister_OneByte(Bme680Registers.TempMsb) * 4096;
             tempAdc += Driver.ReadRegister_OneByte(Bme680Registers.TempLsb) * 16;
             tempAdc += Driver.ReadRegister_OneByte(Bme680Registers.TempXlsb) / 16;

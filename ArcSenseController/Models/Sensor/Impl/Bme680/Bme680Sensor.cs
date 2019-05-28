@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
+using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Bme680
 {
@@ -10,7 +13,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
     /// <remarks>
     /// The BME680 is able to measure gas resistance (air quality), humidity, pressure, and temperature.
     /// </remarks>
-    internal class Bme680Sensor : I2CSensor, IDisposable
+    internal sealed class Bme680Sensor : I2CSensor, ISplitSensor, IMeasuringSensor, IDisposable
     {
         /// <summary>
         /// Gets the internal pressure sensor.
@@ -89,14 +92,21 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
             byte configValue = 0x00;
             configValue |= (byte)TempSensor.TemperatureOversampling;
             configValue |= (byte)PressureSensor.PressureOversampling;
-            Device.Write(new[] { (byte)Bme680Registers.CtrlMeasurement, Convert.ToByte(configValue) });
+            WriteRegister(new[] { (byte)Bme680Registers.CtrlMeasurement, Convert.ToByte(configValue) });
             Task.Delay(1).Wait();
 
             // Set mode to forced mode.
             configValue = ReadRegister_OneByte(Bme680Registers.Mode);
             configValue |= (byte)Bme680OperationModes.ForcedMode;
-            Device.Write(new[] { (byte)Bme680Registers.Mode, configValue });
+            WriteRegister(new[] { (byte)Bme680Registers.Mode, configValue });
             Task.Delay(1).Wait();
+        }
+
+        internal async void WriteRegister(byte[] data)
+        {
+            // This Task.Delay(1) is necessary to prevent the device from deadlocking
+            Device.Write(data);
+            await Task.Delay(1);
         }
 
         /// <summary>
@@ -106,7 +116,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// <returns>Register data.</returns>
         internal uint ReadRegister_TwoBytes_LSBFirst(Bme680Registers reg)
         {
-            return ReadUint((byte) reg);
+            return ReadUint((byte)reg);
         }
 
         internal byte ReadRegister_OneByte(Bme680Registers reg)
@@ -132,7 +142,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// </summary>
         private void ResetSensor()
         {
-            Device.Write(new byte[] { (byte)Bme680Registers.Reset, 0xB6 });
+            WriteRegister(new byte[] { (byte)Bme680Registers.Reset, 0xB6 });
         }
 
         #endregion
@@ -142,14 +152,19 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// <summary>
         /// Triggers all measurements, and then waits for measurement completion.
         /// </summary>
-        internal void ForceRead()
+        private void ForceRead(bool measureGas = false)
         {
+            GasSensor.SetGasMeasurement(measureGas);
+
             var temp = ReadRegister_OneByte(Bme680Registers.Mode);
             temp |= (byte)Bme680OperationModes.ForcedMode;
 
-            Device.Write(new[] {(byte) Bme680Registers.Mode, temp});
+            WriteRegister(new[] {(byte) Bme680Registers.Mode, temp});
 
             while (GetMeasuringState())
+                Task.Delay(1).Wait();
+
+            while (GasSensor.GetGasMeasuringStatus())
                 Task.Delay(1).Wait();
         }
 
@@ -190,5 +205,8 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         }
 
         #endregion
+
+        public IEnumerable<ISensor> SubSensors => new ISensor[] {PressureSensor, HumiditySensor, TempSensor, GasSensor};
+        public void Measure() => ForceRead(true);
     }
 }

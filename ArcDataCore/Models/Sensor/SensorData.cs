@@ -6,27 +6,35 @@ using MessagePack;
 namespace ArcDataCore.Models.Sensor
 {
     /// <summary>
-    /// Represents the time-series data for a sensor at a point in time.
+    /// Represents the time-series data for a sensor.
     /// </summary>
     [MessagePackObject]
     public struct SensorData
     {
+        public SensorData(SensorDataType dataType, SensorModel model, byte[] data)
+        {
+            DataType = dataType;
+            Model = model;
+            Data = data;
+        }
+
+        /// <summary>
+        /// The type of sensor data.
+        /// </summary>
+        [Key(0)]
+        public SensorDataType DataType;
+
         /// <summary>
         /// The sensor model.
         /// </summary>
-        [Key(0)]
+        [Key(1)]
         public SensorModel Model;
 
         /// <summary>
-        /// The date at which the data was generated.
-        /// </summary>
-        [Key(1)]
-        public DateTime Time;
-
-        /// <summary>
-        /// The sensor data.
+        /// Byte array containing the raw sensor data.
+        /// How this is deserialised depends on the <see cref="DataType"/> property.
         /// </summary>
         [Key(2)]
-        public object Data;
+        public byte[] Data;
     }
 }

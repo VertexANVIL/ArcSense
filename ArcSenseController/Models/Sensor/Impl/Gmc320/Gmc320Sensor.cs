@@ -13,7 +13,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Gmc320
     /// Implementation of the GQ Geiger Counter Communication protocol
     /// GQ-RFC1201 Ver 1.40
     /// </summary>
-    internal class Gmc320Sensor : SerialSensor, IGeigerSensor, ITemperatureSensor
+    internal sealed class Gmc320Sensor : SerialSensor, IGeigerSensor, ITemperatureSensor
     {
         public string FirmwareModel { get; private set; }
         public string FirmwareVersion { get; private set; }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using ArcDataCore.Models.Sensor;
 using ArcDataCore.Source;
 
 namespace ArcDataCore.Transport
@@ -12,15 +14,16 @@ namespace ArcDataCore.Transport
     public interface IDataTransport
     {
         /// <summary>
-        /// Commits a package to the transport's queue.
+        /// Whether or not the transport is enabled.
         /// </summary>
-        /// <param name="package">The package to commit.</param>
-        Task Commit(IDataPackage package);
+        bool Enabled { get; }
 
         /// <summary>
-        /// Flushes the transport, ensuring all packages are uploaded to the destination.
-        /// If the transport times out or the connection is lost an error will be thrown.
+        /// Pushes a data point to the transport's stream.
         /// </summary>
-        Task Flush();
+        /// <param name="series">The data point.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>True if the push was successful, otherwise false.</returns>
+        Task<bool> PushAsync(SensorDataPackage series, CancellationToken? token = null);
     }
 }

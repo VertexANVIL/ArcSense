@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
+using ArcDataCore.Models.Data;
 using ArcDataCore.Models.Sensor;
 using ArcSenseController.Models.Sensor.Types;
+using MessagePack;
 
 namespace ArcSenseController.Models.Sensor.Impl.As7262
 {
     /// <summary>
     /// Implementation of the AS7262 visible spectrum device.
     /// </summary>
-    internal class As7262Sensor : I2CSensor, ISpectralSensor, ITemperatureSensor
+    internal sealed class As7262Sensor : I2CSensor, ISpectralSensor, ITemperatureSensor
     {
         private bool _dataReady = false;
         private As7262ConversionType _bank = As7262ConversionType.Default;
@@ -199,8 +201,8 @@ namespace ArcSenseController.Models.Sensor.Impl.As7262
         /// Reads a calibrated spectral channel.
         /// </summary>
         /// <param name="channel">The channel to read.</param>
-        /// <returns>The reading as a double.</returns>
-        private double ReadCalibratedChannel(As7262ChannelType channel)
+        /// <returns>The reading as a float.</returns>
+        private float ReadCalibratedChannel(As7262ChannelType channel)
         {
             var result = (VirtualRead((byte) channel) << 24) | 
                          (VirtualRead((byte) (channel + 1)) << 16) | 
@@ -264,5 +266,20 @@ namespace ArcSenseController.Models.Sensor.Impl.As7262
 
             Device.Write(new[] { (byte)As7262HardRegister.WriteReg, value, (byte)1 });
         }
+
+        private Spectrum6 ReadSpectralData()
+        {
+            return new Spectrum6
+            {
+                Violet = ReadCalibratedChannel(As7262ChannelType.VioletCalibrated),
+                Blue = ReadCalibratedChannel(As7262ChannelType.BlueCalibrated),
+                Green = ReadCalibratedChannel(As7262ChannelType.GreenCalibrated),
+                Yellow = ReadCalibratedChannel(As7262ChannelType.YellowCalibrated),
+                Orange = ReadCalibratedChannel(As7262ChannelType.OrangeCalibrated),
+                Red = ReadCalibratedChannel(As7262ChannelType.RedCalibrated)
+            };
+        }
+
+        public Spectrum6 Spectrum => ReadSpectralData();
     }
 }

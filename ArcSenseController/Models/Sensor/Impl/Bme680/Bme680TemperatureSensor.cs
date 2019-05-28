@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Bme680
 {
-    internal class Bme680TemperatureSensor : Sensor<Bme680Sensor>, ITemperatureSensor
+    internal sealed class Bme680TemperatureSensor : SubSensor<Bme680Sensor>, ITemperatureSensor
     {
         public double Temperature => ReadTempCelsius();
 
@@ -32,7 +33,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
             Calibrate();
 
             // Select IIR Filter for temperature sensor.
-            Driver.Device.Write(new[] { (byte)Bme680Registers.CtrlIir, (byte)IirFilter });
+            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlIir, (byte)IirFilter });
             await Task.Delay(1);
         }
 
@@ -65,8 +66,6 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// <returns>Temperature in celsius.</returns>
         private double ReadTempCelsius()
         {
-            Driver.ForceRead();
-
             var adc = Driver.ReadRegister_OneByte(Bme680Registers.TempMsb) * 4096;
             adc += Driver.ReadRegister_OneByte(Bme680Registers.TempLsb) * 16;
             adc += Driver.ReadRegister_OneByte(Bme680Registers.TempXlsb) / 16;

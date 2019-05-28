@@ -1,10 +1,11 @@
 ﻿using System.Numerics;
 using System.Threading.Tasks;
+using ArcDataCore.Models.Sensor;
 using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Lsm303D
 {
-    internal class Lsm303DMagnetometer : Sensor<Lsm303DSensor>, IMagnetometerSensor, ITemperatureSensor
+    internal sealed class Lsm303DMagnetometer : SubSensor<Lsm303DSensor>, IMagnetometerSensor, ITemperatureSensor
     {
         internal Lsm303DMagnetometerDataRate DataRate = Lsm303DMagnetometerDataRate.Rate100Hz;
         internal Lsm303DMagnetometerMode Mode = Lsm303DMagnetometerMode.ContinuousConversion;

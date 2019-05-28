@@ -1,19 +1,21 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
+using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Lsm303D
 {
     /// <summary>
     /// Interface to the LSM303D accelerometer/magnetometer.
     /// </summary>
-    internal class Lsm303DSensor : I2CSensor
+    internal sealed class Lsm303DSensor : I2CSensor, ISplitSensor
     {
         internal Lsm303DAccelerometer Accelerometer { get; }
         internal Lsm303DMagnetometer Magnetometer { get; }
 
         private const byte LSM_303D_SLAVE_ADDRESS = 0x1D;
 
-        internal Lsm303DSensor()
+        public Lsm303DSensor()
         {
             Accelerometer = new Lsm303DAccelerometer(this);
             Magnetometer = new Lsm303DMagnetometer(this);
@@ -28,5 +30,6 @@ namespace ArcSenseController.Models.Sensor.Impl.Lsm303D
         }
 
         public override SensorModel Model => SensorModel.Lsm303D;
+        public IEnumerable<ISensor> SubSensors => new ISensor[] { Accelerometer, Magnetometer };
     }
 }

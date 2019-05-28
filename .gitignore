@@ -10,3 +10,7 @@
 /ArcSenseController/bin
 /ArcSenseController/obj
 /ArcSenseView/obj
+/ArcView/ArcView/bin/Debug/netstandard2.0
+/ArcView/ArcView/obj
+/ArcView/ArcView.Android/bin/Debug
+/ArcView/ArcView.Android/obj

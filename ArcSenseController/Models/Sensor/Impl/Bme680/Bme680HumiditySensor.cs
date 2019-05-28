@@ -3,7 +3,7 @@ using ArcSenseController.Models.Sensor.Types;
 
 namespace ArcSenseController.Models.Sensor.Impl.Bme680
 {
-    internal class Bme680HumiditySensor : Sensor<Bme680Sensor>, IHumiditySensor
+    internal sealed class Bme680HumiditySensor : SubSensor<Bme680Sensor>, IHumiditySensor
     {
         /// <summary>
         /// Humidity oversampling.
@@ -25,7 +25,7 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
             Calibrate();
 
             // Select humidity oversampling.
-            Driver.Device.Write(new[] { (byte)Bme680Registers.CtrlHumidity, (byte)HumidityOversampling });
+            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlHumidity, (byte)HumidityOversampling });
             await Task.Delay(1);
         }
 
@@ -67,10 +67,8 @@ namespace ArcSenseController.Models.Sensor.Impl.Bme680
         /// Reads the relative humidity.
         /// </summary>
         /// <returns>Relative humidity.</returns>
-        public double GetHumidity()
+        private double GetHumidity()
         {
-            Driver.ForceRead();
-
             var adc = Driver.ReadRegister_OneByte(Bme680Registers.HumMsb) * 256;
             adc += Driver.ReadRegister_OneByte(Bme680Registers.HumLsb);
 
