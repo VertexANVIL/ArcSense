@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
-
+using ArcDataCore.Models.Sensor;
 using Xamarin.Forms;
 
 using ArcView.Models;
@@ -12,14 +12,23 @@ namespace ArcView.ViewModels
 {
     public class SensorsViewModel : BaseViewModel
     {
-        public ObservableCollection<Item> Items { get; set; }
-        public Command LoadItemsCommand { get; set; }
+        public ObservableCollection<SensorTypeItem> Sensors { get; set; }
 
         public SensorsViewModel()
         {
-            Title = "Browse";
-            Items = new ObservableCollection<Item>();
-            LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
+            Title = "Sensors";
+            Sensors = new ObservableCollection<SensorTypeItem>
+            {
+                new SensorTypeItem { Type = SensorDataType.Accelerometer3D, Name = "Acceleration", Icon = "tachometer_alt.xml" },
+                new SensorTypeItem { Type = SensorDataType.Magnetometer3D, Name = "Magnetic Flux", Icon = "magnet.xml" },
+                new SensorTypeItem { Type = SensorDataType.GasResistance, Name = "Gas Resistance", Icon = "chess_board.xml" },
+                new SensorTypeItem { Type = SensorDataType.RelativeHumidity, Name = "Humidity", Icon = "tint.xml" },
+                new SensorTypeItem { Type = SensorDataType.Pressure, Name = "Pressure", Icon = "compress_arrows_alt.xml" },
+                new SensorTypeItem { Type = SensorDataType.Temperature, Name = "Temperature", Icon = "thermometer.xml" },
+                //new SensorTypeItem { Type = SensorDataType.Spectral, Name = "Spectrometer", Icon = "palette.xml" },
+                new SensorTypeItem { Type = SensorDataType.Colour, Name = "Colour", Icon = "palette.xml" },
+                new SensorTypeItem { Type = SensorDataType.Radiation, Name = "Radiation", Icon = "radiation.xml" }
+            };
 
             /**
             MessagingCenter.Subscribe<NewItemPage, Item>(this, "AddItem", async (obj, item) =>
@@ -28,32 +37,6 @@ namespace ArcView.ViewModels
                 Items.Add(newItem);
                 await DataStore.AddItemAsync(newItem);
             });*/
-        }
-
-        async Task ExecuteLoadItemsCommand()
-        {
-            if (IsBusy)
-                return;
-
-            IsBusy = true;
-
-            try
-            {
-                Items.Clear();
-                //var items = await DataStore.GetItemsAsync(true);
-                //foreach (var item in items)
-                //{
-                //    Items.Add(item);
-                //}
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-            finally
-            {
-                IsBusy = false;
-            }
         }
     }
 }

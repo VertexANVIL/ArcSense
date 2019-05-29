@@ -10,19 +10,19 @@
             android:TabbedPage.ToolbarPlacement="Bottom">
 
     <TabbedPage.Children>
-        <NavigationPage Title="Home" IconImageSource="ic_home_black_24dp.xml">
+        <NavigationPage Title="Home" IconImageSource="home.xml">
             <x:Arguments>
                 <views:HomePage />
             </x:Arguments>
         </NavigationPage>
 
-        <NavigationPage Title="Sensors" IconImageSource="ic_wifi_black_24dp.xml">
+        <NavigationPage Title="Sensors" IconImageSource="broadcast_tower.xml">
             <x:Arguments>
                 <views:SensorsPage />
             </x:Arguments>
         </NavigationPage>
 
-        <NavigationPage Title="Settings" IconImageSource="ic_settings_black_24dp.xml">
+        <NavigationPage Title="Settings" IconImageSource="cog.xml">
             <x:Arguments>
                 <views:SettingsPage />
             </x:Arguments>

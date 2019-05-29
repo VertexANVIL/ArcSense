@@ -20,6 +20,8 @@ namespace ArcSenseController.Models.Sensor
             Driver = driver;
         }
 
+        public override Task InitialiseAsync() => Task.CompletedTask;
+
         public override SensorModel Model => Driver.Model;
     }
 }

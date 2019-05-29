@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Data;
 using ArcDataCore.Models.Sensor;
@@ -10,7 +11,7 @@ namespace ArcSenseController.Models.Sensor.Impl.As7262
     /// <summary>
     /// Implementation of the AS7262 visible spectrum device.
     /// </summary>
-    internal sealed class As7262Sensor : I2CSensor, ISpectralSensor, ITemperatureSensor
+    internal sealed class As7262Sensor : I2CSensor, ISplitSensor, ISpectralSensor
     {
         private bool _dataReady = false;
         private As7262ConversionType _bank = As7262ConversionType.Default;
@@ -24,6 +25,9 @@ namespace ArcSenseController.Models.Sensor.Impl.As7262
 
         private As7262IndicatorCurrentLimit _indicatorCurrent = As7262IndicatorCurrentLimit.Limit1Ma;
         private As7262DriverCurrentLimit _driverCurrent = As7262DriverCurrentLimit.Limit12Ma5;
+
+        // Sub-sensors
+        private readonly As7262TemperatureSensor _temperatureSensor;
 
         #region Constants and Enums
 
@@ -76,12 +80,21 @@ namespace ArcSenseController.Models.Sensor.Impl.As7262
 
         #endregion
 
+        /**
         public double Violet => ReadCalibratedChannel(As7262ChannelType.VioletCalibrated);
         public double Blue => ReadCalibratedChannel(As7262ChannelType.BlueCalibrated);
         public double Green => ReadCalibratedChannel(As7262ChannelType.GreenCalibrated);
         public double Yellow => ReadCalibratedChannel(As7262ChannelType.YellowCalibrated);
         public double Orange => ReadCalibratedChannel(As7262ChannelType.OrangeCalibrated);
         public double Red => ReadCalibratedChannel(As7262ChannelType.RedCalibrated);
+        */
+
+        public IEnumerable<ISensor> SubSensors => new ISensor[] { _temperatureSensor };
+
+        public As7262Sensor()
+        {
+            _temperatureSensor = new As7262TemperatureSensor(this);
+        }
 
         public override async Task InitialiseAsync()
         {
@@ -215,12 +228,10 @@ namespace ArcSenseController.Models.Sensor.Impl.As7262
         /// <summary>
         /// Reads the temperature of the integrated temperature sensor.
         /// </summary>
-        private double ReadTemperature()
+        internal double ReadTemperature()
         {
             return VirtualRead((byte) As7262VirtualRegister.DeviceTemp);
         }
-
-        public double Temperature => ReadTemperature();
 
         private byte VirtualRead(byte address)
         {
@@ -267,19 +278,43 @@ namespace ArcSenseController.Models.Sensor.Impl.As7262
             Device.Write(new[] { (byte)As7262HardRegister.WriteReg, value, (byte)1 });
         }
 
-        private Spectrum6 ReadSpectralData()
+        private byte[] ReadSpectralData()
         {
-            return new Spectrum6
+            var arr = new byte[sizeof(float) * 6];
+            for (var i = 0; i < 6; i++)
             {
-                Violet = ReadCalibratedChannel(As7262ChannelType.VioletCalibrated),
-                Blue = ReadCalibratedChannel(As7262ChannelType.BlueCalibrated),
-                Green = ReadCalibratedChannel(As7262ChannelType.GreenCalibrated),
-                Yellow = ReadCalibratedChannel(As7262ChannelType.YellowCalibrated),
-                Orange = ReadCalibratedChannel(As7262ChannelType.OrangeCalibrated),
-                Red = ReadCalibratedChannel(As7262ChannelType.RedCalibrated)
-            };
+                float channel;
+                switch((As7262ChannelIndex)i)
+                {
+                    case As7262ChannelIndex.Violet:
+                        channel = ReadCalibratedChannel(As7262ChannelType.VioletCalibrated);
+                        break;
+                    case As7262ChannelIndex.Blue:
+                        channel = ReadCalibratedChannel(As7262ChannelType.BlueCalibrated);
+                        break;
+                    case As7262ChannelIndex.Green:
+                        channel = ReadCalibratedChannel(As7262ChannelType.GreenCalibrated);
+                        break;
+                    case As7262ChannelIndex.Yellow:
+                        channel = ReadCalibratedChannel(As7262ChannelType.YellowCalibrated);
+                        break;
+                    case As7262ChannelIndex.Orange:
+                        channel = ReadCalibratedChannel(As7262ChannelType.OrangeCalibrated);
+                        break;
+                    case As7262ChannelIndex.Red:
+                        channel = ReadCalibratedChannel(As7262ChannelType.RedCalibrated);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                // Copy the channel value into the destination array
+                Buffer.BlockCopy(BitConverter.GetBytes(channel), 0, arr, sizeof(float) * i, sizeof(float));
+            }
+
+            return arr;
         }
 
-        public Spectrum6 Spectrum => ReadSpectralData();
+        public byte[] Spectrum => ReadSpectralData();
     }
 }

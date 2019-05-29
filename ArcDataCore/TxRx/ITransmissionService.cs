@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using ArcDataCore.Models.Sensor;
+﻿using ArcDataCore.Models.Sensor;
 using ArcDataCore.Transport;
 
-namespace ArcDataCore.Source
+namespace ArcDataCore.TxRx
 {
-    public interface IDataSourceService
+    public interface ITransmissionService
     {
-        IDataTransport Transport { set; }
+        ITransmitter Transport { set; }
 
         void Commit(SensorDataPackage package);
 

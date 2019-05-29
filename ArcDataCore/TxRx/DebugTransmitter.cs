@@ -1,23 +1,22 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
 using MessagePack;
 
-namespace ArcDataCore.Transport
+namespace ArcDataCore.TxRx
 {
     /// <summary>
     /// Transport that logs everything that it sees to the console.
     /// Useful for debugging or development purposes.
     /// </summary>
-    public class DebugTransport : IDataTransport
+    public class DebugTransmitter : ITransmitter
     {
         private static int _totalWritten;
 
         public bool Enabled => true;
 
-        public Task<bool> PushAsync(SensorDataPackage series, CancellationToken? token = null)
+        public Task<bool> PushAsync(SensorDataPackage series)
         {
             var totalBytes = MessagePackSerializer.Serialize(series);
             _totalWritten += totalBytes.Length;

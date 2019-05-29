@@ -58,6 +58,7 @@
     <Compile Include="Models\Sensor\Impl\As7262\As7262ConversionType.cs" />
     <Compile Include="Models\Sensor\Impl\As7262\As7262DriverCurrentLimit.cs" />
     <Compile Include="Models\Sensor\Impl\As7262\AS7262IndicatorCurrentLimit.cs" />
+    <Compile Include="Models\Sensor\Impl\As7262\As7262TemperatureSensor.cs" />
     <Compile Include="Models\Sensor\Impl\Bme680\Bme680GasResistSensor.cs" />
     <Compile Include="Models\Sensor\Impl\Bme680\Bme680HeaterProfileSetPoints.cs" />
     <Compile Include="Models\Sensor\Impl\Bme680\Bme680HumidityOversamplings.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Models\Sensor\Types\ISplitSensor.cs" />
     <Compile Include="Models\Sensor\Types\ITemperatureSensor.cs" />
     <Compile Include="Models\Config\ControllerSection.cs" />
+    <Compile Include="Services\BluetoothService.cs" />
     <Compile Include="Services\PairerService.cs" />
     <Compile Include="Services\ISensorService.cs" />
     <Compile Include="Services\SensorServiceExtensions.cs" />

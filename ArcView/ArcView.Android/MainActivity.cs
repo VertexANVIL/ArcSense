@@ -40,6 +40,7 @@ namespace ArcView.Droid
             var bluetooth = new BluetoothService();
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            //Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App(bluetooth));
         }

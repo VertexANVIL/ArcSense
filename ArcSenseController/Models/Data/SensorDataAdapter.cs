@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ArcDataCore;
 using ArcDataCore.Models.Sensor;
-using ArcDataCore.Source;
+using ArcDataCore.TxRx;
 using ArcSenseController.Models.Sensor.Types;
 using ArcSenseController.Services;
 using MessagePack;
@@ -31,14 +31,14 @@ namespace ArcSenseController.Models.Data
         /// <summary>
         /// Represents the data source that data should be sent to.
         /// </summary>
-        private readonly IDataSourceService _service;
+        private readonly ITransmissionService _service;
 
         private Timer _timer;
         private readonly object _timerLock = new object();
 
         public SensorDataAdapter(IServiceProvider services)
         {
-            _service = services.GetService<IDataSourceService>();
+            _service = services.GetService<ITransmissionService>();
             _sensors = services.GetServices<ISensor>().ToList();
         }
 
@@ -113,10 +113,10 @@ namespace ArcSenseController.Models.Data
                     list.Add((BitConverter.GetBytes(temperature.Temperature), SensorDataType.Temperature));
                     break;
                 case ISpectralSensor spectral:
-                    list.Add((MessagePackSerializer.Serialize(spectral.Spectrum), SensorDataType.Temperature));
+                    list.Add((MessagePackSerializer.Serialize(spectral.Spectrum), SensorDataType.Spectral));
                     break;
                 case IGeigerSensor geiger:
-                    list.Add((BitConverter.GetBytes(geiger.GetCpm()), SensorDataType.RadiationCpm));
+                    list.Add((BitConverter.GetBytes(geiger.GetCpm()), SensorDataType.Radiation));
                     break;
             }
 
@@ -126,9 +126,7 @@ namespace ArcSenseController.Models.Data
 
             // Commit all
             foreach (var (bytes, dataType) in list)
-            {
                 dest.Add(new SensorData(dataType, sensor.Model, bytes));
-            }
 
             // Enforce a mandatory delay of 10ms between polls, to prevent I2C lockups
             Task.Delay(10).Wait();

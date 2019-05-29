@@ -12,126 +12,41 @@ using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
-using ArcDataCore.Source;
+using ArcDataCore.TxRx;
+using ArcSenseController.Services;
 using MessagePack;
 
 namespace ArcSenseController.Models.Data.Transport
 {
-    internal class BluetoothTransport : IDataTransport
+    internal class BluetoothTransport : ITransmitter
     {
-        private RfcommServiceProvider _uploadService;
-        private StreamSocketListener _uploadListener;
-        private StreamSocket _socket;
-        private DataWriter _socketWriter;
+        private readonly BluetoothService _service;
 
-        private bool _initialised;
-
-        internal async Task<bool> Initialise()
+        public BluetoothTransport(BluetoothService service)
         {
-            if (_initialised) throw new Exception("The transport has already been initialised.");
-
-            var id = RfcommServiceId.FromUuid(TransportConstants.ArcServiceGuid);
-            _uploadService = await RfcommServiceProvider.CreateAsync(id);
-
-            // Set up the SDP attributes
-            InitialiseSdpAttributes(_uploadService);
-
-            // Start advertising
-            await SetAdvertise(true);
-
-            _initialised = true;
-            return true;
+            _service = service;
         }
 
-        private void InitialiseSdpAttributes(RfcommServiceProvider provider)
-        {
-            var writer = new DataWriter();
+        public bool Enabled => _service.Connected;
 
-            writer.WriteByte(TransportConstants.BL_SERVICE_NAME_ATTRIBUTE_TYPE);
-            writer.WriteByte((byte)TransportConstants.BL_SERVICE_NAME.Length);
-
-            writer.UnicodeEncoding = UnicodeEncoding.Utf8;
-            writer.WriteString(TransportConstants.BL_SERVICE_NAME);
-
-            provider.SdpRawAttributes.Add(TransportConstants.BL_SERVICE_NAME_ATTRIBUTE_ID, writer.DetachBuffer());
-        }
-
-        private async void UploadListenerOnConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
-        {
-            // If the old socket is still open, terminate it.
-            await DisconnectAsync();
-
-            _socket = args.Socket;
-            _socketWriter = new DataWriter(_socket.OutputStream) {ByteOrder = ByteOrder.LittleEndian};
-            Enabled = true;
-        }
-
-        /// <summary>
-        /// Enables or disables advertising the bluetooth service.
-        /// </summary>
-        /// <param name="advertise">True to enable, False to disable.</param>
-        public async Task SetAdvertise(bool advertise)
-        {
-            if (!advertise)
-            {
-                // Clean up the listening objects
-                _uploadService.StopAdvertising();
-
-                _uploadListener = null;
-                _socket = null;
-                _socketWriter = null;
-                return;
-            }
-
-            _uploadListener = new StreamSocketListener();
-            _uploadListener.ConnectionReceived += UploadListenerOnConnectionReceived;
-
-            await _uploadListener.BindServiceNameAsync(_uploadService.ServiceId.AsString(),
-                SocketProtectionLevel.BluetoothEncryptionWithAuthentication);
-
-            _uploadService.StartAdvertising(_uploadListener);
-        }
-
-        /// <summary>
-        /// Closes the socket and disables the transport.
-        /// </summary>
-        private async Task DisconnectAsync()
-        {
-            if (_socket == null) return;
-
-            await _socket.CancelIOAsync();
-            _socket.Dispose();
-            _socketWriter.Dispose();
-
-            Enabled = false;
-        }
-
-        public bool Enabled { get; private set; }
-        public async Task<bool> PushAsync(SensorDataPackage series, CancellationToken? token = null)
+        public async Task<bool> PushAsync(SensorDataPackage series)
         {
             var data = MessagePackSerializer.Serialize(series);
-
-            // Write the packet version
-            _socketWriter.WriteByte(0x1A);
-
-            // Write the length
-            _socketWriter.WriteUInt32((uint)data.Length);
-            _socketWriter.WriteBytes(data);
-
-            try
+            using (var context = await _service.GetContextAsync())
             {
-                var wbytes = await _socketWriter.StoreAsync();
-                if (wbytes != 0) return true;
-            }
-            catch (Exception e)
-            {
-                // Socket is fucked. Disconnect.
-                await DisconnectAsync();
-                Debug.WriteLine($"Caught exception from socket while writing: {e.Message}");
-                return false;
-            }
+                var writer = context.Writer;
 
-            return false;
+                // Write the protocol version and packet type
+                writer.WriteByte(BluetoothConstants.BL_DATA_SERVICE_PROTOCOL);
+                writer.WriteByte((byte)BluetoothDataType.SensorData);
+
+                // Write the length
+                writer.WriteUInt32((uint)data.Length);
+                writer.WriteBytes(data);
+
+                // Try to send
+                return await context.StoreAsync();
+            }
         }
     }
 }

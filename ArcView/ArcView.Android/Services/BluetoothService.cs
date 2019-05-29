@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Bluetooth;
@@ -73,7 +74,7 @@ namespace ArcView.Droid.Services
 
         private async Task<bool> TryConnectDeviceAsync(BluetoothDevice device)
         {
-            var uuid = UUID.FromString(TransportConstants.BL_SERVICE_GUID);
+            var uuid = UUID.FromString(BluetoothConstants.BL_DATA_SERVICE_GUID);
             var socket = device.CreateRfcommSocketToServiceRecord(uuid);
             if (socket == null) return false;
 

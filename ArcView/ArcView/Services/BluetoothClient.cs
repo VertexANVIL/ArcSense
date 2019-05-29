@@ -1,25 +1,38 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
+using ArcDataCore.Transport;
+using ArcDataCore.TxRx;
 using MessagePack;
 
 namespace ArcView.Services
 {
-    internal class BluetoothClient
+    internal class BluetoothClient : IReciever
     {
+        private const int STACK_CAPACITY = 10;
+
         private readonly IBluetoothService _service;
         private BinaryReader _reader;
         private BinaryWriter _writer;
         private Thread _thread;
 
+        /// <summary>
+        /// Stack that holds incoming data packages before they are processed.
+        /// </summary>
+        private readonly BlockingCollection<SensorDataPackage> _pushStack 
+            = new BlockingCollection<SensorDataPackage>(new ConcurrentStack<SensorDataPackage>(), STACK_CAPACITY);
+
+        private bool _recieve;
+
         internal BluetoothClient(IBluetoothService service)
         {
             _service = service;
-            _thread = new Thread(Recieve);
 
             // Register event handlers
             _service.Connected += ServiceOnConnected;
@@ -30,6 +43,12 @@ namespace ArcView.Services
         {
             _reader = new BinaryReader(_service.InputStream);
             _writer = new BinaryWriter(_service.OutputStream);
+            _recieve = true;
+
+            // if the thread is still running (somehow), terminate it now
+            if (_thread != null && _thread.IsAlive) _thread.Abort();
+
+            _thread = new Thread(Recieve);
             _thread.Start();
         }
 
@@ -37,30 +56,54 @@ namespace ArcView.Services
         {
             _reader = null;
             _writer = null;
-            _thread.Abort();
+            _recieve = false;
         }
 
         private void Recieve()
         {
             try
             {
-                // Ensure protocol version matches
-                var header = _reader.ReadByte();
-                if (header != 0x1A) throw new Exception($"Unsupported protocol version {header}!");
+                while (_recieve)
+                {
+                    // Ensure protocol version matches
+                    var header = _reader.ReadByte();
+                    if (header != BluetoothConstants.BL_DATA_SERVICE_PROTOCOL)
+                        throw new Exception($"Unsupported protocol version {header}!");
 
-                var length = _reader.ReadUInt32();
-                var data = _reader.ReadBytes((int)length);
+                    var type = (BluetoothDataType)_reader.ReadByte();
+                    switch (type)
+                    {
+                        case BluetoothDataType.Command:
+                            // TODO: read whether we care about a response
+                            var respond = _reader.ReadBoolean();
 
-                var obj = MessagePackSerializer.Deserialize<SensorDataPackage>(data);
-                // TODO: do something with package
+                            break;
+                        case BluetoothDataType.SensorData:
+                            var length = _reader.ReadUInt32();
+                            var data = _reader.ReadBytes((int)length);
 
-                Debug.WriteLine($"Read package @ {obj.TimeStamp} with {obj.Data.Length} sensor datapoints");
+                            var obj = MessagePackSerializer.Deserialize<SensorDataPackage>(data);
+                            Debug.WriteLine($"BT: Read package @ {obj.TimeStamp}");
+                            if (!_pushStack.TryAdd(obj)) Debug.WriteLine($"BT: Ignoring @ {obj.TimeStamp} (Package stack is full!)");
+
+                            break;
+                        default:
+                            throw new Exception($"Unsupported bluetooth data type {type}!");
+                    }
+                }
             }
             catch (Exception e)
             {
                 // Caught an exception so assume the socket is broken
                 _service.Disconnect();
             }
+        }
+
+        public Task<SensorDataPackage> PullAsync(CancellationToken? token)
+        {
+            return token != null 
+                ? Task.FromResult(_pushStack.Take(token.Value)) 
+                : Task.FromResult(_pushStack.Take());
         }
     }
 }

@@ -9,6 +9,8 @@ namespace ArcDataCore.Models.Sensor
     /// </summary>
     public enum SensorDataType : ushort
     {
+        Unknown = 0,
+
         /// <summary>
         /// Raw acceleration data as an array of three shorts.
         /// </summary>
@@ -40,13 +42,18 @@ namespace ArcDataCore.Models.Sensor
         Temperature = 23,
 
         /// <summary>
-        /// Spectral data as a MessagePack serialisation of <see cref="Data.Spectrum6"/>.
+        /// Spectral data as a byte array of six floats.
         /// </summary>
         Spectral = 25,
 
         /// <summary>
+        /// Colour data
+        /// </summary>
+        Colour = 26,
+
+        /// <summary>
         /// Radiation as counts per minute.
         /// </summary>
-        RadiationCpm = 30,
+        Radiation = 30,
     }
 }

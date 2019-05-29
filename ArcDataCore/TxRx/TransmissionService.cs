@@ -1,51 +1,47 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
 using ArcDataCore.Transport;
 
-namespace ArcDataCore.Source
+namespace ArcDataCore.TxRx
 {
-    public class DataSourceService : IDataSourceService
+    public class TransmissionService : ITransmissionService
     {
-        private const int QUEUE_CAPACITY = 250;
+        private const int STACK_CAPACITY = 10;
         private const int UPLOAD_TIMEOUT = 1000; // Upload timeout of 1 second
 
         private readonly Thread _uploader;
-        private readonly CancellationTokenSource _cts = new CancellationTokenSource(UPLOAD_TIMEOUT);
+        //private readonly CancellationTokenSource _cts = new CancellationTokenSource(UPLOAD_TIMEOUT);
 
         /// <summary>
         /// This stack represents a persistent, database-backed local stack, or a dummy in-memory stack.
         /// It is enqueued to by the Collector thread and dequeued by the Uploader thread.
         /// </summary>
         private readonly BlockingCollection<SensorDataPackage> _stack 
-            = new BlockingCollection<SensorDataPackage>(new ConcurrentStack<SensorDataPackage>(), QUEUE_CAPACITY); // TODO: make this fs-backed
+            = new BlockingCollection<SensorDataPackage>(new ConcurrentStack<SensorDataPackage>(), STACK_CAPACITY); // TODO: make this fs-backed
 
         /// <summary>
         /// The transport used by the service.
         /// </summary>
-        public IDataTransport Transport { private get; set; } = new DebugTransport();
+        public ITransmitter Transport { private get; set; } = new DebugTransmitter();
 
-        public DataSourceService()
+        public TransmissionService()
         {
             _uploader = new Thread(async () =>
             {
                 do
                 {
-                    // TODO: peek instead so we can abort...
-                    if (!_stack.TryTake(out var item)) continue;
-                    var token = _cts.Token;
-
-                    // TODO: what should we really do if a transport isn't enabled? probably shouldn't just discard the data...
                     if (!Transport.Enabled) continue;
 
-                    if (!await Transport.PushAsync(item, token))
+                    // TODO: peek instead so we can abort...
+                    if (!_stack.TryTake(out var item)) continue;
+                    //var token = _cts.Token;
+
+                    // Try to push the item onto the transport.
+                    if (!await Transport.PushAsync(item))
                     {
-                        // TODO: put back into the queue
+                        // TODO: push item back onto the stack
+                        _stack.Add(item);
                     }
                 } while (true);
             });

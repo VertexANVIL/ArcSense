@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
 using Windows.Devices.I2c;
 using Windows.Devices.Enumeration;
-using ArcDataCore.Source;
 using ArcDataCore.Transport;
+using ArcDataCore.TxRx;
 using ArcSenseController.Models.Data;
 using ArcSenseController.Models.Data.Transport;
 using ArcSenseController.Models.Sensor;
@@ -45,27 +45,28 @@ namespace ArcSenseController
             var collection = new ServiceCollection();
 
             // Add transports
-            collection.AddSingleton<IDataTransport, DebugTransport>();
-            collection.AddSingleton<BluetoothTransport>();
+            collection.AddSingleton<ITransmitter, DebugTransmitter>();
             collection.AddSingleton<PairerService>();
+            collection.AddSingleton<BluetoothService>();
+            collection.AddSingleton<BluetoothTransport>();
 
             // Try to register all sensors
             await RegisterSensors(collection);
 
-            collection.AddSingleton<IDataSourceService, DataSourceService>();
+            collection.AddSingleton<ITransmissionService, TransmissionService>();
             collection.AddSingleton<SensorDataAdapter>();
 
             var provider = collection.BuildServiceProvider();
 
-            var uploader = provider.GetRequiredService<IDataSourceService>();
+            var uploader = provider.GetRequiredService<ITransmissionService>();
             var adapter = provider.GetRequiredService<SensorDataAdapter>();
             var pairer = provider.GetRequiredService<PairerService>();
 
             // TODO: DEBUG: enable bluetooth
-            var bluetooth = provider.GetRequiredService<BluetoothTransport>();
+            var bluetooth = provider.GetRequiredService<BluetoothService>();
             await bluetooth.Initialise();
 
-            uploader.Transport = bluetooth;
+            uploader.Transport = provider.GetRequiredService<BluetoothTransport>();
 
             // Start the application threads
             pairer.StartWatcher();
