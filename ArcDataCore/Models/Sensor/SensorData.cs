@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MessagePack;
 
 namespace ArcDataCore.Models.Sensor
 {
-    /// <summary>
-    /// Represents the time-series data for a sensor.
-    /// </summary>
-    [MessagePackObject]
-    public struct SensorData
+    public class SensorData
     {
-        public SensorData(SensorDataType dataType, SensorModel model, byte[] data)
+        public SensorData(SensorDataType type, SensorModel model, object data)
         {
-            DataType = dataType;
+            DataType = type;
             Model = model;
             Data = data;
         }
@@ -21,20 +16,16 @@ namespace ArcDataCore.Models.Sensor
         /// <summary>
         /// The type of sensor data.
         /// </summary>
-        [Key(0)]
-        public SensorDataType DataType;
+        public readonly SensorDataType DataType;
 
         /// <summary>
         /// The sensor model.
         /// </summary>
-        [Key(1)]
-        public SensorModel Model;
+        public readonly SensorModel Model;
 
         /// <summary>
-        /// Byte array containing the raw sensor data.
-        /// How this is deserialised depends on the <see cref="DataType"/> property.
+        /// Object representing the sensor data model.
         /// </summary>
-        [Key(2)]
-        public byte[] Data;
+        public readonly object Data;
     }
 }

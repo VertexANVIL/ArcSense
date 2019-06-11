@@ -15,6 +15,7 @@ using Windows.Storage.Streams;
 using ArcDataCore.TxRx;
 using ArcSenseController.Services;
 using MessagePack;
+using MessagePack.Resolvers;
 
 namespace ArcSenseController.Models.Data.Transport
 {
@@ -29,7 +30,7 @@ namespace ArcSenseController.Models.Data.Transport
 
         public bool Enabled => _service.Connected;
 
-        public async Task<bool> PushAsync(SensorDataPackage series)
+        public async Task<bool> PushAsync(TransportDataPackage series)
         {
             var data = MessagePackSerializer.Serialize(series);
             using (var context = await _service.GetContextAsync())

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Bluetooth;
@@ -18,7 +17,7 @@ using Java.Util;
 
 namespace ArcView.Droid.Services
 {
-    internal class BluetoothService : IBluetoothService
+    public class BluetoothService : IBluetoothService
     {
         public bool IsConnected => _socket != null && _socket.IsConnected;
         public Stream OutputStream => _socket?.OutputStream;

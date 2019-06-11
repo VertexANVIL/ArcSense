@@ -8,8 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using ArcDataCore;
 using ArcDataCore.Models.Sensor;
+using ArcDataCore.Transport;
 using ArcDataCore.TxRx;
-using ArcSenseController.Models.Sensor.Types;
+using ArcSenseController.Sensors.Types;
 using ArcSenseController.Services;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,14 +56,14 @@ namespace ArcSenseController.Models.Data
             try
             {
                 var now = DateTime.UtcNow;
-                var list = new List<SensorData>();
+                var list = new List<TransportData>();
 
                 var sw = new Stopwatch();
                 sw.Start();
                 foreach (var sensor in _sensors) Poll(sensor, list);
                 sw.Stop();
 
-                _service.Commit(new SensorDataPackage(now, list.ToArray()));
+                _service.Commit(new TransportDataPackage(now, list.ToArray()));
                 Debug.WriteLine($"Full sensor poll completed in {sw.ElapsedMilliseconds} ms.");
             }
             catch (Exception e)
@@ -81,9 +82,9 @@ namespace ArcSenseController.Models.Data
         /// </summary>
         /// <param name="sensor">The sensor to use.</param>
         /// <param name="dest">The destination collection to add the data to.</param>
-        private void Poll(ISensor sensor, ICollection<SensorData> dest)
+        private void Poll(ISensor sensor, ICollection<TransportData> dest)
         {
-            var list = new List<(byte[], SensorDataType)>();
+            var list = new List<(object, SensorDataType)>();
 
             var sw = new Stopwatch();
             sw.Start();
@@ -101,22 +102,22 @@ namespace ArcSenseController.Models.Data
                     list.Add((magnetometer.Flux, SensorDataType.Magnetometer3D));
                     break;
                 case IGasResistanceSensor gasResist:
-                    list.Add((BitConverter.GetBytes(gasResist.Resistance), SensorDataType.GasResistance));
+                    list.Add((gasResist.Resistance, SensorDataType.GasResistance));
                     break;
                 case IHumiditySensor humidity:
-                    list.Add((BitConverter.GetBytes(humidity.Humidity), SensorDataType.RelativeHumidity));
+                    list.Add((humidity.Humidity, SensorDataType.RelativeHumidity));
                     break;
                 case IPressureSensor pressure:
-                    list.Add((BitConverter.GetBytes(pressure.Pressure), SensorDataType.Pressure));
+                    list.Add((pressure.Pressure, SensorDataType.Pressure));
                     break;
                 case ITemperatureSensor temperature:
-                    list.Add((BitConverter.GetBytes(temperature.Temperature), SensorDataType.Temperature));
+                    list.Add((temperature.Temperature, SensorDataType.Temperature));
                     break;
                 case ISpectralSensor spectral:
-                    list.Add((MessagePackSerializer.Serialize(spectral.Spectrum), SensorDataType.Spectral));
+                    list.Add((spectral.Spectrum, SensorDataType.Spectral));
                     break;
                 case IGeigerSensor geiger:
-                    list.Add((BitConverter.GetBytes(geiger.GetCpm()), SensorDataType.Radiation));
+                    list.Add((geiger.Cpm, SensorDataType.Radiation));
                     break;
             }
 
@@ -125,8 +126,8 @@ namespace ArcSenseController.Models.Data
             //Debug.WriteLine($"Read sensor {sensor.Model} in {sw.ElapsedMilliseconds} ms at {now}");
 
             // Commit all
-            foreach (var (bytes, dataType) in list)
-                dest.Add(new SensorData(dataType, sensor.Model, bytes));
+            foreach (var (obj, dataType) in list)
+                dest.Add(new TransportData(dataType, sensor.Model, MessagePackSerializer.Serialize(obj)));
 
             // Enforce a mandatory delay of 10ms between polls, to prevent I2C lockups
             Task.Delay(10).Wait();

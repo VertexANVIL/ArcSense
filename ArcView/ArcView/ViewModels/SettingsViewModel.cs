@@ -9,11 +9,7 @@ namespace ArcView.ViewModels
     {
         public SettingsViewModel()
         {
-            Title = "About";
-
-            OpenWebCommand = new Command(() => Device.OpenUri(new Uri("https://xamarin.com/platform")));
+            Title = "Settings";
         }
-
-        public ICommand OpenWebCommand { get; }
     }
 }

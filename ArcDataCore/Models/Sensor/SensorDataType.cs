@@ -55,5 +55,13 @@ namespace ArcDataCore.Models.Sensor
         /// Radiation as counts per minute.
         /// </summary>
         Radiation = 30,
+
+        // Virtual data types
+        /// <summary>
+        /// Index of Air Quality (IAQ)
+        /// </summary>
+        VAirQualityIndex = 1010,
+
+
     }
 }

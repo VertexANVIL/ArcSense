@@ -7,7 +7,7 @@ namespace ArcDataCore.TxRx
     {
         ITransmitter Transport { set; }
 
-        void Commit(SensorDataPackage package);
+        void Commit(TransportDataPackage package);
 
         /// <summary>
         /// Enables the uploader thread.

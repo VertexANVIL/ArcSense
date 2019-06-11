@@ -10,6 +10,9 @@ using Android.OS;
 using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using ArcView.Droid.Services;
+using ArcView.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Plugin.CurrentActivity;
 using Xamarin.Forms.Platform.Android;
 
 namespace ArcView.Droid
@@ -31,18 +34,18 @@ namespace ArcView.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(savedInstanceState);
+            CrossCurrentActivity.Current.Init(this, savedInstanceState);
 
-            ////if (savedInstanceState == null)
-            //{
-            //    BluetoothLowEnergyAdapter.Init(this);
-            //}
+            var collection = new ServiceCollection();
+            collection.AddSingleton<IBluetoothService, BluetoothService>();
+            collection.AddSingleton<IInAppNotifyService, SnackBarNotifyService>();
 
-            var bluetooth = new BluetoothService();
-
+            // Set up and init Xamarin
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             //Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            LoadApplication(new App(bluetooth));
+
+            LoadApplication(new App(collection));
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {

@@ -15,15 +15,15 @@
                     <ViewCell>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="60*" />
-                                <ColumnDefinition Width="20*" />
+                                <ColumnDefinition Width="45*" />
+                                <ColumnDefinition Width="35*" />
                                 <ColumnDefinition Width="20*" />
                             </Grid.ColumnDefinitions>
                             <StackLayout Grid.Column="0" HorizontalOptions="Start" Orientation="Horizontal" Margin="10">
                                 <Image Source="{Binding Icon}" HeightRequest="30" WidthRequest="30" />
                                 <Label Text="{Binding Name}" Style="{DynamicResource ListItemTextStyle}" LineBreakMode="NoWrap" />
                             </StackLayout>
-                            <Label Grid.Column="1" Text="NaN" Style="{DynamicResource ListItemTextStyle}" FontSize="20" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
+                            <Label Grid.Column="1" Text="{Binding Value, Mode=OneWay}" Style="{DynamicResource ListItemTextStyle}" FontSize="20" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
                             <StackLayout Grid.Column="2" BackgroundColor="LimeGreen">
                                 <Label Text="OK" Style="{DynamicResource ListItemTextStyle}" FontSize="20" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" TextColor="White" />
                             </StackLayout>

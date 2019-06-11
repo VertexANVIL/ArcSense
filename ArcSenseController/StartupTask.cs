@@ -12,12 +12,9 @@ using ArcDataCore.Transport;
 using ArcDataCore.TxRx;
 using ArcSenseController.Models.Data;
 using ArcSenseController.Models.Data.Transport;
-using ArcSenseController.Models.Sensor;
-using ArcSenseController.Models.Sensor.Impl;
-using ArcSenseController.Models.Sensor.Impl.As7262;
-using ArcSenseController.Models.Sensor.Impl.Bme680;
-using ArcSenseController.Models.Sensor.Impl.Gmc320;
-using ArcSenseController.Models.Sensor.Impl.Lsm303D;
+using ArcSenseController.Sensors.Impl.As7262;
+using ArcSenseController.Sensors.Impl.Bme680;
+using ArcSenseController.Sensors.Impl.Lsm303D;
 using ArcSenseController.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -79,32 +76,10 @@ namespace ArcSenseController
 
         private static async Task RegisterSensors(IServiceCollection services)
         {
-            await services.RegisterSensorAsync<As7262Sensor>();
+            //await services.RegisterSensorAsync<As7262Sensor>(); // TODO: skip this until Spectrum6 deserialisation is fixed
             await services.RegisterSensorAsync<Bme680Sensor>();
             //await services.RegisterSensorAsync<Gmc320Sensor>();
             await services.RegisterSensorAsync<Lsm303DSensor>();
-        }
-
-        private async Task TestSensors()
-        {
-            //var geiger = new Gmc320Sensor();
-
-            var bme = new Bme680Sensor();
-            await bme.InitialiseAsync();
-
-            var gasresist = bme.GasSensor.Resistance;
-            var pressure = bme.PressureSensor.Pressure;
-            var humidity = bme.HumiditySensor.Humidity;
-            var temperature = bme.TempSensor.Temperature;
-
-            var lsm = new Lsm303DSensor();
-            await lsm.InitialiseAsync();
-            var accel = lsm.Accelerometer.Acceleration;
-            var flux = lsm.Magnetometer.Flux;
-            var temp = lsm.Magnetometer.Temperature;
-
-            var asm = new As7262Sensor();
-            await asm.InitialiseAsync();
         }
     }
 }

@@ -17,8 +17,8 @@ namespace ArcDataCore.TxRx
         /// This stack represents a persistent, database-backed local stack, or a dummy in-memory stack.
         /// It is enqueued to by the Collector thread and dequeued by the Uploader thread.
         /// </summary>
-        private readonly BlockingCollection<SensorDataPackage> _stack 
-            = new BlockingCollection<SensorDataPackage>(new ConcurrentStack<SensorDataPackage>(), STACK_CAPACITY); // TODO: make this fs-backed
+        private readonly BlockingCollection<TransportDataPackage> _stack 
+            = new BlockingCollection<TransportDataPackage>(new ConcurrentStack<TransportDataPackage>(), STACK_CAPACITY); // TODO: make this fs-backed
 
         /// <summary>
         /// The transport used by the service.
@@ -47,7 +47,7 @@ namespace ArcDataCore.TxRx
             });
         }
 
-        public void Commit(SensorDataPackage package)
+        public void Commit(TransportDataPackage package)
         {
             if (!_stack.TryAdd(package))
             {

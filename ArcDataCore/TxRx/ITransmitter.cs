@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
+using ArcDataCore.Transport;
 
 namespace ArcDataCore.TxRx
 {
@@ -18,6 +19,6 @@ namespace ArcDataCore.TxRx
         /// </summary>
         /// <param name="series">The data point.</param>
         /// <returns>True if the push was successful, otherwise false.</returns>
-        Task<bool> PushAsync(SensorDataPackage series);
+        Task<bool> PushAsync(TransportDataPackage series);
     }
 }

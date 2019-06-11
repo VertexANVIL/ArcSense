@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
+using ArcDataCore.Transport;
 using MessagePack;
 
 namespace ArcDataCore.TxRx
@@ -16,7 +17,7 @@ namespace ArcDataCore.TxRx
 
         public bool Enabled => true;
 
-        public Task<bool> PushAsync(SensorDataPackage series)
+        public Task<bool> PushAsync(TransportDataPackage series)
         {
             var totalBytes = MessagePackSerializer.Serialize(series);
             _totalWritten += totalBytes.Length;
