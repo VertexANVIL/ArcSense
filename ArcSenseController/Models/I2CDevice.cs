@@ -13,24 +13,24 @@ namespace ArcSenseController.Models
         }
 
         public void Read(byte register, byte[] buffer) {
-            _service.Read(register, buffer);
+            _service.Read(_address, register, buffer);
         }
 
         public void Read(byte register, byte buffer) {
-            _service.Read(register, new [] { buffer });
+            _service.Read(_address, register, new [] { buffer });
         }
 
         public void Write(byte register, byte[] buffer) {
-            _service.Write(register, buffer);
+            _service.Write(_address, register, buffer);
         }
 
         public void Write(byte register, byte buffer) {
-            _service.Write(register, new [] { buffer });
+            _service.Write(_address, register, new [] { buffer });
         }
 
         public void WriteRead(byte register, byte[] write, byte[] buffer) {
-            _service.Write(register, write);
-            _service.Read(register, buffer);
+            _service.Write(_address, register, write);
+            _service.Read(_address, register, buffer);
         }
 
         public void WriteRead(byte register, byte write, byte[] buffer) {

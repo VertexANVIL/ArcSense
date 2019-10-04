@@ -75,13 +75,13 @@ namespace ArcSenseController
         private static void RegisterSensors(IServiceCollection services)
         {
             //services.AddSingleton<As7262Sensor>();
-            //services.AddSingleton<Bme680Sensor>();
-            services.AddSingleton<ISensor>(new Gmc320Sensor("/dev/ttyUSB0"));
-            //services.AddSingleton<Lsm303DSensor>();
+            services.AddSingleton<Bme680Sensor>();
+            //services.AddSingleton<ISensor>(new Gmc320Sensor("/dev/ttyUSB0"));
+            services.AddSingleton<Lsm303DSensor>();
         }
 
         private static async Task InitialiseSensors(IServiceProvider provider) {
-            var sensors = provider.GetServices<Sensor>();
+            var sensors = provider.GetServices<ISensor>();
             foreach (var sensor in sensors) {
                 await sensor.InitialiseAsync();
             }

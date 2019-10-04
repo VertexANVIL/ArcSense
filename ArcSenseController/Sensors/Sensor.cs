@@ -19,6 +19,6 @@ namespace ArcSenseController.Sensors
         protected abstract Task InitialiseInternalAsync();
 
         public abstract SensorModel Model { get; }
-        bool Initialised { get; set; }
+        public bool Initialised { get; set; }
     }
 }

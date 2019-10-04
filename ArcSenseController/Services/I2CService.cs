@@ -14,19 +14,17 @@ namespace ArcSenseController.Services
                 throw new Exception("Failed to initialise bus!");
         }
 
-        public void SetAddress(byte address) {
-            var code = I2CNativeInterop.Ioctl(_bus, I2CNativeInterop.I2C_SLAVE, address);
-        }
-
         public I2CDevice GetDeviceAt(byte address) {
             return new I2CDevice(this, address);
         }
 
-        public void Read(byte register, byte[] buffer) {
+        public void Read(byte address, byte register, byte[] buffer) {
+            I2CNativeInterop.Ioctl(_bus, I2CNativeInterop.I2C_SLAVE, address);
             I2CNativeInterop.Read(_bus, buffer, buffer.Length);
         }
 
-        public void Write(byte register, byte[] buffer) {
+        public void Write(byte address, byte register, byte[] buffer) {
+            I2CNativeInterop.Ioctl(_bus, I2CNativeInterop.I2C_SLAVE, address);
             I2CNativeInterop.Write(_bus, buffer, buffer.Length);
         }
     }
