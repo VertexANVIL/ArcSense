@@ -93,7 +93,7 @@ namespace ArcSenseController.Sensors.Impl.As7262
             _temperatureSensor = new As7262TemperatureSensor(this);
         }
 
-        public override async Task InitialiseAsync()
+        protected override async Task InitialiseInternalAsync()
         {
             InitI2C(AS7262_SLAVE_ADDRESS);
 

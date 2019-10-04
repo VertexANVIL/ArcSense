@@ -68,7 +68,7 @@ namespace ArcSenseController.Models.Data
             }
             catch (Exception e)
             {
-                // TOOD: write some exception text
+                // TODO: write some exception text
                 throw;
             }
             finally
@@ -84,6 +84,7 @@ namespace ArcSenseController.Models.Data
         /// <param name="dest">The destination collection to add the data to.</param>
         private void Poll(ISensor sensor, ICollection<TransportData> dest)
         {
+            if (!sensor.Initialised) return;
             var list = new List<(object, SensorDataType)>();
 
             var sw = new Stopwatch();

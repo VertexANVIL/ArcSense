@@ -13,7 +13,7 @@ namespace ArcSenseController.Sensors.Impl.Bh1745
         private const byte BH1745_SLAVE_ADDRESS = 0x38;
         public Bh1745Sensor(I2CService i2c) : base(i2c) {}
 
-        public override Task InitialiseAsync()
+        protected override Task InitialiseInternalAsync()
         {
             throw new NotImplementedException();
         }

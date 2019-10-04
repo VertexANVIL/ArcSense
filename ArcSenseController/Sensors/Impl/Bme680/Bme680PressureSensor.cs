@@ -24,7 +24,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
 
         public Bme680PressureSensor(Bme680Sensor driver) : base(driver) { }
 
-        public override Task InitialiseAsync()
+        protected override Task InitialiseInternalAsync()
         {
             Calibrate();
             return Task.CompletedTask;

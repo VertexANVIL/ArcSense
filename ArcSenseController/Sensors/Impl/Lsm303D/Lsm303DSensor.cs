@@ -22,7 +22,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
             Magnetometer = new Lsm303DMagnetometer(this);
         }
 
-        public override async Task InitialiseAsync()
+        protected override async Task InitialiseInternalAsync()
         {
             InitI2C(LSM_303D_SLAVE_ADDRESS);
 

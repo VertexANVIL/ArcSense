@@ -60,7 +60,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// Initiates the sensor with the specified configuration,
         /// or the default if none is passed.
         /// </summary>
-        public override async Task InitialiseAsync()
+        protected override async Task InitialiseInternalAsync()
         {
             InitI2C(BME680_SLAVE_ADDRESS);
 

@@ -8,6 +8,8 @@ namespace ArcSenseController.Sensors.Types
     /// </summary>
     internal interface ISensor
     {
+        bool Initialised {get; set;}
+
         /// <summary>
         /// Initialises the sensor.
         /// </summary>

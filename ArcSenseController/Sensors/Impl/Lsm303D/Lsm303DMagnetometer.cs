@@ -19,7 +19,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
         /// Initialises the sensor.
         /// Should only be called once from the core class's Initialise method.
         /// </summary>
-        public override Task InitialiseAsync()
+        protected override Task InitialiseInternalAsync()
         {
             WriteCtrlRegisters();
             return Task.CompletedTask;

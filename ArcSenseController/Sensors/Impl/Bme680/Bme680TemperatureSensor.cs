@@ -27,7 +27,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
 
         public Bme680TemperatureSensor(Bme680Sensor driver) : base(driver) { }
 
-        public override async Task InitialiseAsync()
+        protected override async Task InitialiseInternalAsync()
         {
             Calibrate();
 

@@ -20,7 +20,7 @@ namespace ArcSenseController.Sensors.Impl.Gmc320
 
         public Gmc320Sensor(string portName, int baudRate = 115200) : base(portName, baudRate) { }
 
-        public override Task InitialiseAsync()
+        protected override Task InitialiseInternalAsync()
         {
             Open();
 
