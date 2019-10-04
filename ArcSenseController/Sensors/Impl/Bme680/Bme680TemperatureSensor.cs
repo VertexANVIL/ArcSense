@@ -32,7 +32,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
             Calibrate();
 
             // Select IIR Filter for temperature sensor.
-            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlIir, (byte)IirFilter });
+            Driver.WriteRegister((byte)Bme680Registers.CtrlIir, new byte[] { (byte)IirFilter });
             await Task.Delay(1);
         }
 

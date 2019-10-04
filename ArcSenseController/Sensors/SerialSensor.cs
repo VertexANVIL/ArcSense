@@ -1,4 +1,5 @@
 ﻿using System.IO.Ports;
+using System;
 
 namespace ArcSenseController.Sensors
 {
@@ -30,7 +31,7 @@ namespace ArcSenseController.Sensors
 
         private void PortOnErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
-            
+            throw new Exception("serial err");
         }
 
         /// <summary>

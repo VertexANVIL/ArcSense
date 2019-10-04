@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
 using ArcSenseController.Sensors.Types;
+using ArcSenseController.Services;
 
 namespace ArcSenseController.Sensors.Impl.As7262
 {
@@ -87,14 +88,14 @@ namespace ArcSenseController.Sensors.Impl.As7262
 
         public IEnumerable<ISensor> SubSensors => new ISensor[] { _temperatureSensor };
 
-        public As7262Sensor()
+        public As7262Sensor(I2CService i2c) : base(i2c)
         {
             _temperatureSensor = new As7262TemperatureSensor(this);
         }
 
         public override async Task InitialiseAsync()
         {
-            await InitI2C(AS7262_SLAVE_ADDRESS);
+            InitI2C(AS7262_SLAVE_ADDRESS);
 
             // Reset the sensor
             _reset = true;
@@ -238,7 +239,7 @@ namespace ArcSenseController.Sensors.Impl.As7262
                 if ((status & (byte)As7262HardRegister.TxValid) == 0) break;
             }
 
-            Device.Write(new[] { (byte)As7262HardRegister.WriteReg, address, (byte)1 });
+            Device.Write((byte)As7262HardRegister.WriteReg, new byte[] { address, (byte)1 });
 
             while (true)
             {
@@ -248,7 +249,7 @@ namespace ArcSenseController.Sensors.Impl.As7262
             }
 
             var output = new byte[1];
-            Device.WriteRead(new[] { (byte)As7262HardRegister.ReadReg, (byte)1 }, output);
+            Device.WriteRead((byte)As7262HardRegister.ReadReg, (byte)1, output);
 
             return output[0];
         }
@@ -262,7 +263,7 @@ namespace ArcSenseController.Sensors.Impl.As7262
                 if ((status & (byte) As7262HardRegister.TxValid) == 0) break;
             }
 
-            Device.Write(new[] { (byte) As7262HardRegister.WriteReg, (byte) (address | 0x80), (byte)1 });
+            Device.Write((byte) As7262HardRegister.WriteReg, new[] { (byte) (address | 0x80), (byte)1 });
 
             while (true)
             {
@@ -271,7 +272,7 @@ namespace ArcSenseController.Sensors.Impl.As7262
                 if ((status & (byte)As7262HardRegister.TxValid) == 0) break;
             }
 
-            Device.Write(new[] { (byte)As7262HardRegister.WriteReg, value, (byte)1 });
+            Device.Write((byte)As7262HardRegister.WriteReg, new[] { value, (byte)1 });
         }
 
         private byte[] ReadSpectralData()

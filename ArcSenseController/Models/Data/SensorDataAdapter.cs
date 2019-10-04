@@ -93,6 +93,7 @@ namespace ArcSenseController.Models.Data
             if (sensor is IMeasuringSensor measure) measure.Measure();
 
             // Read the data from the sensor (if required)
+            // TODO: this is broken and switching this way will only read one sensor type on multi type sensors!
             switch (sensor)
             {
                 case IAccelerometerSensor accelerometer:

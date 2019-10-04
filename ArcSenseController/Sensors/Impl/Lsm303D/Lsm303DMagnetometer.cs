@@ -28,16 +28,16 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
         private void WriteCtrlRegisters()
         {
             var reg5 = (EnableTemperatureSensor ? 0x8 : 0x00) | ((byte) Resolution << 6) | ((byte) DataRate << 2);
-            Driver.Device.Write(new [] { (byte)Lsm303DRegisters.Ctrl5, (byte)reg5 });
-            Driver.Device.Write(new [] { (byte)Lsm303DRegisters.Ctrl6, (byte)((byte)Scale << 5) });
-            Driver.Device.Write(new [] { (byte)Lsm303DRegisters.Ctrl7, (byte)Mode });
+            Driver.Device.Write((byte)Lsm303DRegisters.Ctrl5, (byte)reg5);
+            Driver.Device.Write((byte)Lsm303DRegisters.Ctrl6, (byte)((byte)Scale << 5));
+            Driver.Device.Write((byte)Lsm303DRegisters.Ctrl7, (byte)Mode);
         }
 
         private AxisData3<short> ReadFlux()
         {
             // 0x80h = auto-increment
             var data = new byte[6];
-            Driver.Device.WriteRead(new[] { (byte)((byte)Lsm303DRegisters.OutXla | 0x80) }, data);
+            Driver.Device.Read((byte)((byte)Lsm303DRegisters.OutXla | 0x80), data);
 
             return new AxisData3<short>(
                 (short)(data[0] | (data[1] << 8)),
@@ -49,7 +49,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
         {
             // Reads two's compliment right justified value.
             var data = new byte[2];
-            Driver.Device.WriteRead(new[] { (byte)((byte)Lsm303DRegisters.TempOutL | 0x80) }, data);
+            Driver.Device.Read((byte)((byte)Lsm303DRegisters.TempOutL | 0x80), data);
 
             return (data[1] << 8 | data[0]) / 8 + 25;
         }

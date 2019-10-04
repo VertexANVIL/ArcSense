@@ -179,8 +179,9 @@ namespace ArcSenseController.Sensors.Impl.Gmc320
         /// </summary>
         public double GetCelsius()
         {
-            var result = ReadBytes(3);
-            ReadAaByte();
+            SendStr("GETTEMP");
+
+            var result = ReadBytes(4);
 
             var temp = double.Parse($"{result[0]}.{result[1]}");
             if (result[2] != 0) temp *= -1;
@@ -192,6 +193,8 @@ namespace ArcSenseController.Sensors.Impl.Gmc320
         /// </summary>
         public Vector<int> GetGyroVector()
         {
+            SendStr("GETGYRO");
+
             var x = (ReadByte() << 8) | ReadByte();
             var y = (ReadByte() << 8) | ReadByte();
             var z = (ReadByte() << 8) | ReadByte();

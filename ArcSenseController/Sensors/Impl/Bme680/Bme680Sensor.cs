@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
 using ArcSenseController.Sensors.Types;
+using ArcSenseController.Services;
 
 namespace ArcSenseController.Sensors.Impl.Bme680
 {
@@ -12,7 +13,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
     /// <remarks>
     /// The BME680 is able to measure gas resistance (air quality), humidity, pressure, and temperature.
     /// </remarks>
-    internal sealed class Bme680Sensor : I2CSensor, ISplitSensor, IMeasuringSensor, IDisposable
+    internal sealed class Bme680Sensor : I2CSensor, ISplitSensor, IMeasuringSensor
     {
         /// <summary>
         /// Gets the internal pressure sensor.
@@ -43,7 +44,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// Initiates the BME680 sensor to get air quality level, temperature, humidity, pressure and altitude.
         /// The <see cref="InitialiseAsync"/> method must be called in order to initialise the sensor for use.
         /// </summary>
-        public Bme680Sensor()
+        public Bme680Sensor(I2CService service) : base(service)
         {
             PressureSensor = new Bme680PressureSensor(this);
             HumiditySensor = new Bme680HumiditySensor(this);
@@ -61,7 +62,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// </summary>
         public override async Task InitialiseAsync()
         {
-            await InitI2C(BME680_SLAVE_ADDRESS);
+            InitI2C(BME680_SLAVE_ADDRESS);
 
             // Reset the sensor and wait for boot
             ResetSensor();
@@ -91,20 +92,20 @@ namespace ArcSenseController.Sensors.Impl.Bme680
             byte configValue = 0x00;
             configValue |= (byte)TempSensor.TemperatureOversampling;
             configValue |= (byte)PressureSensor.PressureOversampling;
-            WriteRegister(new[] { (byte)Bme680Registers.CtrlMeasurement, Convert.ToByte(configValue) });
+            Device.Write((byte)Bme680Registers.CtrlMeasurement, Convert.ToByte(configValue));
             Task.Delay(1).Wait();
 
             // Set mode to forced mode.
             configValue = ReadRegister_OneByte(Bme680Registers.Mode);
             configValue |= (byte)Bme680OperationModes.ForcedMode;
-            WriteRegister(new[] { (byte)Bme680Registers.Mode, configValue });
+            WriteRegister((byte)Bme680Registers.Mode, new [] { configValue });
             Task.Delay(1).Wait();
         }
 
-        internal async void WriteRegister(byte[] data)
+        internal async void WriteRegister(byte register, byte[] data)
         {
             // This Task.Delay(1) is necessary to prevent the device from deadlocking
-            Device.Write(data);
+            Device.Write(register, data);
             await Task.Delay(1);
         }
 
@@ -141,7 +142,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// </summary>
         private void ResetSensor()
         {
-            WriteRegister(new byte[] { (byte)Bme680Registers.Reset, 0xB6 });
+            WriteRegister((byte)Bme680Registers.Reset, new byte[] { 0xB6 });
         }
 
         #endregion
@@ -158,7 +159,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
             var temp = ReadRegister_OneByte(Bme680Registers.Mode);
             temp |= (byte)Bme680OperationModes.ForcedMode;
 
-            WriteRegister(new[] {(byte) Bme680Registers.Mode, temp});
+            WriteRegister((byte) Bme680Registers.Mode, new [] { temp });
 
             while (GetMeasuringState())
                 Task.Delay(1).Wait();
@@ -189,18 +190,6 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         {
             var readValue = ReadRegister_OneByte(Bme680Registers.EasStatus0);
             return (readValue & 0b10000000) == 0b10000000;
-        }
-
-        #endregion
-
-        #region Disposal
-
-        /// <summary>
-        /// Cleans up the resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Device.Dispose();
         }
 
         #endregion

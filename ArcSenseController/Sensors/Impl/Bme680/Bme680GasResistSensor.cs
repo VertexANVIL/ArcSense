@@ -45,11 +45,11 @@ namespace ArcSenseController.Sensors.Impl.Bme680
             await Task.Delay(1);
 
             // Define heater-on time.
-            Driver.WriteRegister(new[] { (byte)Bme680Registers.GasWait0, CalculateHeatDuration(HeatDuration) });
+            Driver.WriteRegister((byte)Bme680Registers.GasWait0, new byte[] { CalculateHeatDuration(HeatDuration) });
             await Task.Delay(1);
 
             // Set heater temperature.
-            Driver.WriteRegister(new[] { (byte)Bme680Registers.ResHeat0, CalculateHeaterResistance(HeatTemperature) });
+            Driver.WriteRegister((byte)Bme680Registers.ResHeat0, new byte[] { CalculateHeaterResistance(HeatTemperature) });
             await Task.Delay(1);
         }
 
@@ -126,7 +126,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
             else
                 configValue &= 0b11101111;
 
-            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlGas1, configValue });
+            Driver.WriteRegister((byte)Bme680Registers.CtrlGas1, new byte[] { configValue });
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// <param name="heaterProfileSetPoint">Heater profile set-point.</param>
         private void SelectHeaterProfileSetPoint(Bme680HeaterProfileSetPoints heaterProfileSetPoint)
         {
-            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlGas1, (byte)heaterProfileSetPoint });
+            Driver.WriteRegister((byte)Bme680Registers.CtrlGas1, new byte[] { (byte)heaterProfileSetPoint });
         }
 
         /// <summary>

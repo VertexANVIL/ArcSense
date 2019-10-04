@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
 using ArcSenseController.Sensors.Types;
+using ArcSenseController.Services;
 
 namespace ArcSenseController.Sensors.Impl.Lsm303D
 {
@@ -15,7 +16,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
 
         private const byte LSM_303D_SLAVE_ADDRESS = 0x1D;
 
-        public Lsm303DSensor()
+        public Lsm303DSensor(I2CService service) : base(service)
         {
             Accelerometer = new Lsm303DAccelerometer(this);
             Magnetometer = new Lsm303DMagnetometer(this);
@@ -23,7 +24,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
 
         public override async Task InitialiseAsync()
         {
-            await InitI2C(LSM_303D_SLAVE_ADDRESS);
+            InitI2C(LSM_303D_SLAVE_ADDRESS);
 
             await Accelerometer.InitialiseAsync();
             await Magnetometer.InitialiseAsync();

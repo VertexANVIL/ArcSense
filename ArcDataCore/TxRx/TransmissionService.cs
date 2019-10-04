@@ -11,7 +11,6 @@ namespace ArcDataCore.TxRx
         private const int UPLOAD_TIMEOUT = 1000; // Upload timeout of 1 second
 
         private readonly Thread _uploader;
-        //private readonly CancellationTokenSource _cts = new CancellationTokenSource(UPLOAD_TIMEOUT);
 
         /// <summary>
         /// This stack represents a persistent, database-backed local stack, or a dummy in-memory stack.
@@ -31,11 +30,12 @@ namespace ArcDataCore.TxRx
             {
                 do
                 {
-                    if (!Transport.Enabled) continue;
-
                     // TODO: peek instead so we can abort...
-                    if (!_stack.TryTake(out var item)) continue;
-                    //var token = _cts.Token;
+                    // sleep thread if not enabled or we don't have any items
+                    if (!Transport.Enabled || !_stack.TryTake(out var item)) {
+                        Thread.Sleep(100);
+                        continue;
+                    }
 
                     // Try to push the item onto the transport.
                     if (!await Transport.PushAsync(item))

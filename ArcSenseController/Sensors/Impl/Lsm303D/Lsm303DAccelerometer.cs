@@ -31,16 +31,16 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
                         (EnableZAxis ? 0x1 << 2 : 0x0) | 
                         (EnableYAxis ? 0x1 << 1 : 0x0) |
                         (EnableXAxis ? 0x1 : 0x0);
-            Driver.Device.Write(new[] { (byte)Lsm303DRegisters.Ctrl1, (byte)reg1 });
+            Driver.Device.Write((byte)Lsm303DRegisters.Ctrl1, (byte)reg1);
 
             var reg2 = ((byte)Bandwidth << 6) | ((byte)Scale << 3);
-            Driver.Device.Write(new[] { (byte)Lsm303DRegisters.Ctrl2, (byte)reg2 });
+            Driver.Device.Write((byte)Lsm303DRegisters.Ctrl2, (byte)reg2);
         }
 
         private AxisData3<short> ReadAcceleration()
         {
             var data = new byte[6];
-            Driver.Device.WriteRead(new []{ (byte)((byte)Lsm303DRegisters.OutXlm | 0x80) }, data);
+            Driver.Device.Read((byte)((byte)Lsm303DRegisters.OutXlm | 0x80), data);
 
             return new AxisData3<short>(
                 (short) (data[0] | (data[1] << 8)),

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,10 +6,10 @@
 
   <ItemGroup>
     <PackageReference Include="Deedle" Version="2.0.4" />
-    <PackageReference Include="FSharp.Core" Version="4.6.2" />
+    <PackageReference Include="FSharp.Core" Version="4.7.0" />
     <PackageReference Include="MessagePack" Version="1.7.3.7" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="System.Data.SQLite" Version="1.0.110" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.111.0" />
   </ItemGroup>
 
 </Project>

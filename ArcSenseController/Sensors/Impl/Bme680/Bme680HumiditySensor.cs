@@ -25,7 +25,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
             Calibrate();
 
             // Select humidity oversampling.
-            Driver.WriteRegister(new[] { (byte)Bme680Registers.CtrlHumidity, (byte)HumidityOversampling });
+            Driver.WriteRegister((byte)Bme680Registers.CtrlHumidity, new byte[] { (byte)HumidityOversampling });
             await Task.Delay(1);
         }
 
