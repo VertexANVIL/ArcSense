@@ -1,12 +1,9 @@
 ﻿using System.Threading.Tasks;
-using ArcSenseController.Sensors.Types;
 
 namespace ArcSenseController.Sensors.Impl.Bme680
 {
-    internal sealed class Bme680TemperatureSensor : SubSensor<Bme680Sensor>, ITemperatureSensor
+    internal sealed class Bme680TemperatureSensor : HardwareSensor<Bme680Sensor>
     {
-        public double Temperature => ReadTempCelsius();
-
         /// <summary>
         /// Temperature oversampling.
         /// </summary>
@@ -63,7 +60,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// Reads the temperature in celsius.
         /// </summary>
         /// <returns>Temperature in celsius.</returns>
-        private double ReadTempCelsius()
+        internal double ReadTempCelsius()
         {
             var adc = Driver.ReadRegister_OneByte(Bme680Registers.TempMsb) * 4096;
             adc += Driver.ReadRegister_OneByte(Bme680Registers.TempLsb) * 16;

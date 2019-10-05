@@ -6,7 +6,10 @@ using ArcSenseController.Models;
 
 namespace ArcSenseController.Sensors
 {
-    internal abstract class I2CSensor : Sensor
+    /// <summary>
+    /// Base implementation for a sensor that communicates over an I2C interface.
+    /// </summary>
+    internal abstract class I2CSensor : HardwareSensor
     {
         private readonly I2CService _i2c;
         public I2CDevice Device;

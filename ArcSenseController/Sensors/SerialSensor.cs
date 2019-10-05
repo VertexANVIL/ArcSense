@@ -1,9 +1,14 @@
 ﻿using System.IO.Ports;
 using System;
 
+using System.Diagnostics;
+
 namespace ArcSenseController.Sensors
 {
-    internal abstract class SerialSensor : Sensor
+    /// <summary>
+    /// Base implementation for a sensor that communicates over a serial interface.
+    /// </summary>
+    internal abstract class SerialSensor : HardwareSensor, IDisposable
     {
         /// <summary>
         /// The serial port name.
@@ -25,7 +30,7 @@ namespace ArcSenseController.Sensors
             PortName = portName;
             BaudRate = baudRate;
             Open();
-
+            
             Port.ErrorReceived += PortOnErrorReceived;
         }
 
@@ -41,6 +46,16 @@ namespace ArcSenseController.Sensors
         {
             Port = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.One);
             Port.Open();
+        }
+
+        protected void Close() {
+            Port.Close();
+        }
+
+        public virtual void Dispose()
+        {
+            Close();
+            Port.Dispose();
         }
     }
 }

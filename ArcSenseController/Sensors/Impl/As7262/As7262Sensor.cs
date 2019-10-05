@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
-using ArcSenseController.Sensors.Types;
 using ArcSenseController.Services;
 
 namespace ArcSenseController.Sensors.Impl.As7262
@@ -10,7 +9,7 @@ namespace ArcSenseController.Sensors.Impl.As7262
     /// <summary>
     /// Implementation of the AS7262 visible spectrum device.
     /// </summary>
-    internal sealed class As7262Sensor : I2CSensor, ISplitSensor, ISpectralSensor
+    internal sealed class As7262Sensor : I2CSensor
     {
         private bool _dataReady = false;
         private As7262ConversionType _bank = As7262ConversionType.Default;
@@ -24,9 +23,6 @@ namespace ArcSenseController.Sensors.Impl.As7262
 
         private As7262IndicatorCurrentLimit _indicatorCurrent = As7262IndicatorCurrentLimit.Limit1Ma;
         private As7262DriverCurrentLimit _driverCurrent = As7262DriverCurrentLimit.Limit12Ma5;
-
-        // Sub-sensors
-        private readonly As7262TemperatureSensor _temperatureSensor;
 
         #region Constants and Enums
 
@@ -85,13 +81,7 @@ namespace ArcSenseController.Sensors.Impl.As7262
         public double Orange => ReadCalibratedChannel(As7262ChannelType.OrangeCalibrated);
         public double Red => ReadCalibratedChannel(As7262ChannelType.RedCalibrated);
         */
-
-        public IEnumerable<ISensor> SubSensors => new ISensor[] { _temperatureSensor };
-
-        public As7262Sensor(I2CService i2c) : base(i2c)
-        {
-            _temperatureSensor = new As7262TemperatureSensor(this);
-        }
+        public As7262Sensor(I2CService i2c) : base(i2c) {}
 
         protected override async Task InitialiseInternalAsync()
         {
@@ -124,6 +114,10 @@ namespace ArcSenseController.Sensors.Impl.As7262
         }
 
         public override SensorModel Model => SensorModel.As7262;
+
+        public override (SensorDataType, object)[] Read() => new (SensorDataType, object) [] {
+            (SensorDataType.Spectral, ReadSpectralData())
+        };
 
         private void EnableInterrupt()
         {
@@ -311,7 +305,5 @@ namespace ArcSenseController.Sensors.Impl.As7262
 
             return arr;
         }
-
-        public byte[] Spectrum => ReadSpectralData();
     }
 }

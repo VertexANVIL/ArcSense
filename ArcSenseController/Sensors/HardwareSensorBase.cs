@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using ArcDataCore.Models.Sensor;
-using ArcSenseController.Sensors.Types;
 
 namespace ArcSenseController.Sensors
 {
-    internal abstract class Sensor : ISensor
+    /// <summary>
+    /// Represents a hardware sensor driver.
+    /// </summary>
+    internal abstract class HardwareSensorBase : ISensor
     {
         public async Task InitialiseAsync() {
             try {
@@ -13,6 +16,7 @@ namespace ArcSenseController.Sensors
                 Initialised = true;
             } catch (Exception e) {
                 // write something to the logs about not being able to initialise this sensor, and why
+                Debug.WriteLine($"Failed to initialise sensor {Model}: \"{e.Message}\"");
             }
         }
 

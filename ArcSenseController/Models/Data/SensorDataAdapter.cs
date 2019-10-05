@@ -10,7 +10,7 @@ using ArcDataCore;
 using ArcDataCore.Models.Sensor;
 using ArcDataCore.Transport;
 using ArcDataCore.TxRx;
-using ArcSenseController.Sensors.Types;
+using ArcSenseController.Sensors;
 using ArcSenseController.Services;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +27,7 @@ namespace ArcSenseController.Models.Data
         /// <summary>
         /// Represents all sensors registered on this adapter instance.
         /// </summary>
-        private readonly IList<ISensor> _sensors;
+        private readonly IList<HardwareSensor> _sensors;
 
         /// <summary>
         /// Represents the data source that data should be sent to.
@@ -40,7 +40,7 @@ namespace ArcSenseController.Models.Data
         public SensorDataAdapter(IServiceProvider services)
         {
             _service = services.GetService<ITransmissionService>();
-            _sensors = services.GetServices<ISensor>().ToList();
+            _sensors = services.GetServices<HardwareSensor>().ToList();
         }
 
         public void Start()
@@ -68,8 +68,8 @@ namespace ArcSenseController.Models.Data
             }
             catch (Exception e)
             {
-                // TODO: write some exception text
-                throw;
+                // write some exception text
+                Debug.WriteLine($"Failed to poll sensors: \"{e.Message}\"");
             }
             finally
             {
@@ -82,54 +82,27 @@ namespace ArcSenseController.Models.Data
         /// </summary>
         /// <param name="sensor">The sensor to use.</param>
         /// <param name="dest">The destination collection to add the data to.</param>
-        private void Poll(ISensor sensor, ICollection<TransportData> dest)
+        private void Poll(HardwareSensor sensor, ICollection<TransportData> dest)
         {
             if (!sensor.Initialised) return;
-            var list = new List<(object, SensorDataType)>();
 
             var sw = new Stopwatch();
             sw.Start();
 
             // Run the sensor measurements (if required)
             if (sensor is IMeasuringSensor measure) measure.Measure();
-
-            // Read the data from the sensor (if required)
-            // TODO: this is broken and switching this way will only read one sensor type on multi type sensors!
-            switch (sensor)
-            {
-                case IAccelerometerSensor accelerometer:
-                    list.Add((accelerometer.Acceleration, SensorDataType.Accelerometer3D));
-                    break;
-                case IMagnetometerSensor magnetometer:
-                    list.Add((magnetometer.Flux, SensorDataType.Magnetometer3D));
-                    break;
-                case IGasResistanceSensor gasResist:
-                    list.Add((gasResist.Resistance, SensorDataType.GasResistance));
-                    break;
-                case IHumiditySensor humidity:
-                    list.Add((humidity.Humidity, SensorDataType.RelativeHumidity));
-                    break;
-                case IPressureSensor pressure:
-                    list.Add((pressure.Pressure, SensorDataType.Pressure));
-                    break;
-                case ITemperatureSensor temperature:
-                    list.Add((temperature.Temperature, SensorDataType.Temperature));
-                    break;
-                case ISpectralSensor spectral:
-                    list.Add((spectral.Spectrum, SensorDataType.Spectral));
-                    break;
-                case IGeigerSensor geiger:
-                    list.Add((geiger.Cpm, SensorDataType.Radiation));
-                    break;
-            }
+            var data = sensor.Read();
 
             sw.Stop();
 
             //Debug.WriteLine($"Read sensor {sensor.Model} in {sw.ElapsedMilliseconds} ms at {now}");
 
             // Commit all
-            foreach (var (obj, dataType) in list)
+            foreach (var (dataType, obj) in data) {
+                Debug.WriteLine($"TYPE: {dataType}");
+                Debug.WriteLine($"DATA: {Convert.ToString(obj)}");
                 dest.Add(new TransportData(dataType, sensor.Model, MessagePackSerializer.Serialize(obj)));
+            }
 
             // Enforce a mandatory delay of 10ms between polls, to prevent I2C lockups
             Task.Delay(10).Wait();

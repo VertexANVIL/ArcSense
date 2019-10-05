@@ -61,7 +61,5 @@ namespace ArcDataCore.Models.Sensor
         /// Index of Air Quality (IAQ)
         /// </summary>
         VAirQualityIndex = 1010,
-
-
     }
 }

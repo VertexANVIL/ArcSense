@@ -19,5 +19,7 @@ namespace ArcSenseController.Sensors.Impl.Bh1745
         }
 
         public override SensorModel Model { get; }
+        public override (SensorDataType, object)[] Read() => new (SensorDataType, object) [] {
+        };
     }
 }

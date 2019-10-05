@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
-using ArcSenseController.Sensors.Types;
+using ArcDataCore.Models.Data;
 using ArcSenseController.Services;
 
 namespace ArcSenseController.Sensors.Impl.Lsm303D
@@ -9,7 +9,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
     /// <summary>
     /// Interface to the LSM303D accelerometer/magnetometer.
     /// </summary>
-    internal sealed class Lsm303DSensor : I2CSensor, ISplitSensor
+    internal sealed class Lsm303DSensor : I2CSensor
     {
         internal Lsm303DAccelerometer Accelerometer { get; }
         internal Lsm303DMagnetometer Magnetometer { get; }
@@ -31,6 +31,11 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
         }
 
         public override SensorModel Model => SensorModel.Lsm303D;
-        public IEnumerable<ISensor> SubSensors => new ISensor[] { Accelerometer, Magnetometer };
+
+        public override (SensorDataType, object)[] Read() => new (SensorDataType, object) [] {
+            (SensorDataType.Accelerometer3D, Accelerometer.ReadAcceleration()),
+            (SensorDataType.Magnetometer3D, Magnetometer.ReadFlux()),
+            (SensorDataType.Temperature, Magnetometer.ReadTemperature())
+        };
     }
 }

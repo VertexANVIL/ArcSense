@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ArcSenseController.Sensors.Types;
 
 namespace ArcSenseController.Sensors.Impl.Bme680
 {
-    internal sealed class Bme680GasResistSensor : SubSensor<Bme680Sensor>, IGasResistanceSensor
+    internal sealed class Bme680GasResistSensor : HardwareSensor<Bme680Sensor>
     {
         /// <summary>
         /// Gas sensor heat duration in ms. Max value is 252.
@@ -166,7 +165,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// Reads the gas resistance.
         /// </summary>
         /// <returns>Gas resistance in Ohms.</returns>
-        private double ReadGasResistance()
+        internal double ReadGasResistance()
         {
             var tempAdc = Driver.ReadRegister_OneByte(Bme680Registers.TempMsb) * 4096;
             tempAdc += Driver.ReadRegister_OneByte(Bme680Registers.TempLsb) * 16;
@@ -180,7 +179,5 @@ namespace ArcSenseController.Sensors.Impl.Bme680
 
             return val;
         }
-
-        public double Resistance => ReadGasResistance();
     }
 }

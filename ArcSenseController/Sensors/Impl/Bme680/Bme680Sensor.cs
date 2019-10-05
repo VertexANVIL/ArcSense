@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
-using ArcSenseController.Sensors.Types;
 using ArcSenseController.Services;
 
 namespace ArcSenseController.Sensors.Impl.Bme680
@@ -13,7 +12,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
     /// <remarks>
     /// The BME680 is able to measure gas resistance (air quality), humidity, pressure, and temperature.
     /// </remarks>
-    internal sealed class Bme680Sensor : I2CSensor, ISplitSensor, IMeasuringSensor
+    internal sealed class Bme680Sensor : I2CSensor, IMeasuringSensor
     {
         /// <summary>
         /// Gets the internal pressure sensor.
@@ -53,6 +52,13 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         }
 
         #endregion
+
+        public override (SensorDataType, object)[] Read() => new (SensorDataType, object) [] {
+            (SensorDataType.Pressure, PressureSensor.GetPressure()),
+            (SensorDataType.RelativeHumidity, HumiditySensor.GetHumidity()),
+            (SensorDataType.Temperature, TempSensor.ReadTempCelsius()),
+            (SensorDataType.GasResistance, GasSensor.ReadGasResistance())
+        };
 
         #region I2CCom
 

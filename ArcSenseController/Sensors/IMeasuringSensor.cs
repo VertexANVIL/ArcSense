@@ -1,4 +1,4 @@
-﻿namespace ArcSenseController.Sensors.Types
+﻿namespace ArcSenseController.Sensors
 {
     /// <summary>
     /// Defines a sensor that a measure method must be called on

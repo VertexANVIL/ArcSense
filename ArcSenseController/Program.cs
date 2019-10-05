@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Runtime.Loader;
 using ArcDataCore.Transport;
 using ArcDataCore.TxRx;
 using ArcSenseController.Models.Data;
@@ -14,7 +15,6 @@ using ArcSenseController.Sensors.Impl.As7262;
 using ArcSenseController.Sensors.Impl.Bme680;
 using ArcSenseController.Sensors.Impl.Lsm303D;
 using ArcSenseController.Sensors.Impl.Gmc320;
-using ArcSenseController.Sensors.Types;
 using ArcSenseController.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
@@ -33,10 +33,14 @@ namespace ArcSenseController
             var collection = new ServiceCollection();
 
             // Add I2C
-            //var i2c = new I2CService();
-            //i2c.InitBus();
+            var i2c = new I2CService();
+            try {
+                i2c.InitBus();
+            } catch (Exception e) {
+                Debug.WriteLine($"Failed to init i2c: {e.Message}");
+            }
 
-            //collection.AddSingleton(i2c);
+            collection.AddSingleton(i2c);
 
             // Add transports
             collection.AddSingleton<DebugTransmitter>();
@@ -75,15 +79,23 @@ namespace ArcSenseController
         private static void RegisterSensors(IServiceCollection services)
         {
             //services.AddSingleton<As7262Sensor>();
-            services.AddSingleton<Bme680Sensor>();
-            //services.AddSingleton<ISensor>(new Gmc320Sensor("/dev/ttyUSB0"));
-            services.AddSingleton<Lsm303DSensor>();
+            services.AddSingleton<HardwareSensor, Bme680Sensor>();
+            //services.AddSingleton<HardwareSensor>(new Gmc320Sensor("/dev/ttyUSB0"));
+            //services.AddSingleton<HardwareSensor, Lsm303DSensor>();
         }
 
         private static async Task InitialiseSensors(IServiceProvider provider) {
-            var sensors = provider.GetServices<ISensor>();
+            var sensors = provider.GetServices<HardwareSensor>();
             foreach (var sensor in sensors) {
                 await sensor.InitialiseAsync();
+            }
+        }
+
+        private static void CleanupSensors(IServiceProvider provider) {
+            var sensors = provider.GetServices<HardwareSensor>();
+            foreach (var sensor in sensors) {
+                if (sensor is IDisposable disposable)
+                    disposable.Dispose();
             }
         }
     }

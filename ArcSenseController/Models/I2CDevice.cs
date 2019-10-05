@@ -29,8 +29,7 @@ namespace ArcSenseController.Models
         }
 
         public void WriteRead(byte register, byte[] write, byte[] buffer) {
-            _service.Write(_address, register, write);
-            _service.Read(_address, register, buffer);
+            _service.WriteRead(_address, register, write, buffer);
         }
 
         public void WriteRead(byte register, byte write, byte[] buffer) {

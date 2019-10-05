@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ArcSenseController.Sensors.Types;
 
 namespace ArcSenseController.Sensors.Impl.Bme680
 {
-    internal sealed class Bme680PressureSensor : SubSensor<Bme680Sensor>, IPressureSensor
+    internal sealed class Bme680PressureSensor : HardwareSensor<Bme680Sensor>
     {
         /// <summary>
         /// Pressure oversampling.
@@ -80,7 +79,7 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// Reads the pressure in Pa.
         /// </summary>
         /// <returns>Pressure in Pa.</returns>
-        private double GetPressure()
+        internal double GetPressure()
         {
             var adc = Driver.ReadRegister_OneByte(Bme680Registers.PressMsb) * 4096;
             adc += Driver.ReadRegister_OneByte(Bme680Registers.PressLsb) * 16;
@@ -94,12 +93,10 @@ namespace ArcSenseController.Sensors.Impl.Bme680
         /// </summary>
         /// <param name="meanSeaLevelPressureInBar">Mean sea level pressure in bar. Will be used for altitude calculation from the pressure.</param>
         /// <returns>Altitude from the sea level in meters.</returns>
-        public double ReadAltitude(double meanSeaLevelPressureInBar)
+        internal double ReadAltitude(double meanSeaLevelPressureInBar)
         {
             var phPa = GetPressure() / 100;
             return 44330.0 * (1.0 - Math.Pow((phPa / meanSeaLevelPressureInBar), 0.1903));
         }
-
-        public double Pressure => GetPressure();
     }
 }

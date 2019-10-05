@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
 
-namespace ArcSenseController.Sensors.Types
+namespace ArcSenseController.Sensors
 {
     /// <summary>
     /// Base sensor interface.

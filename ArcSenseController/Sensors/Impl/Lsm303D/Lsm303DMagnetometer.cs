@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using ArcDataCore.Models.Data;
-using ArcSenseController.Sensors.Types;
 
 namespace ArcSenseController.Sensors.Impl.Lsm303D
 {
-    internal sealed class Lsm303DMagnetometer : SubSensor<Lsm303DSensor>, IMagnetometerSensor, ITemperatureSensor
+    internal sealed class Lsm303DMagnetometer : HardwareSensor<Lsm303DSensor>
     {
         internal Lsm303DMagnetometerDataRate DataRate = Lsm303DMagnetometerDataRate.Rate100Hz;
         internal Lsm303DMagnetometerMode Mode = Lsm303DMagnetometerMode.ContinuousConversion;
@@ -33,7 +32,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
             Driver.Device.Write((byte)Lsm303DRegisters.Ctrl7, (byte)Mode);
         }
 
-        private AxisData3<short> ReadFlux()
+        internal AxisData3<short> ReadFlux()
         {
             // 0x80h = auto-increment
             var data = new byte[6];
@@ -45,7 +44,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
                 (short)(data[4] | (data[5] << 8)));
         }
 
-        private double ReadTemperature()
+        internal double ReadTemperature()
         {
             // Reads two's compliment right justified value.
             var data = new byte[2];
@@ -53,8 +52,5 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
 
             return (data[1] << 8 | data[0]) / 8 + 25;
         }
-
-        public double Temperature => ReadTemperature();
-        public AxisData3<short> Flux => ReadFlux();
     }
 }

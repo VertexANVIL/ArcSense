@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ArcDataCore.Models.Sensor;
-using ArcSenseController.Sensors.Types;
 
 namespace ArcSenseController.Sensors.Impl.Gmc320
 {
@@ -13,7 +12,7 @@ namespace ArcSenseController.Sensors.Impl.Gmc320
     /// Implementation of the GQ Geiger Counter Communication protocol
     /// GQ-RFC1201 Ver 1.40
     /// </summary>
-    internal sealed class Gmc320Sensor : SerialSensor, IGeigerSensor, ITemperatureSensor
+    internal sealed class Gmc320Sensor : SerialSensor, IDisposable
     {
         public string FirmwareModel { get; private set; }
         public string FirmwareVersion { get; private set; }
@@ -22,7 +21,7 @@ namespace ArcSenseController.Sensors.Impl.Gmc320
 
         protected override Task InitialiseInternalAsync()
         {
-            Open();
+            PowerOn();
 
             var version = GetVersion();
             FirmwareModel = version.Substring(0, 7);
@@ -118,11 +117,15 @@ namespace ArcSenseController.Sensors.Impl.Gmc320
         public void PowerOn()
         {
             SendStr("POWERON");
+            ReadString(12); // SPIA str
+            Port.DiscardInBuffer();
         }
 
         public void Reboot()
         {
             SendStr("REBOOT");
+            ReadString(12); // SPIA str
+            Port.DiscardInBuffer();
         }
 
         public void SendKeys(Gmc320Keys key, params Gmc320Keys[] keys)
@@ -245,7 +248,15 @@ namespace ArcSenseController.Sensors.Impl.Gmc320
             if (b != 0xAA) throw new Exception($"Received byte 0x{b:X2}, expected byte 0xAA");
         }
 
-        public double Temperature => GetCelsius();
-        public int Cpm => GetCpm();
+        public override (SensorDataType, object)[] Read() => new (SensorDataType, object) [] {
+            //(SensorDataType.Temperature, GetCelsius()),
+            (SensorDataType.Radiation, GetCpm())
+        };
+
+        public override void Dispose()
+        {
+            PowerOff();
+            base.Dispose();
+        }
     }
 }

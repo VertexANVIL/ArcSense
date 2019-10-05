@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using ArcDataCore.Models.Data;
-using ArcSenseController.Sensors.Types;
 
 namespace ArcSenseController.Sensors.Impl.Lsm303D
 {
-    internal sealed class Lsm303DAccelerometer : SubSensor<Lsm303DSensor>, IAccelerometerSensor
+    internal sealed class Lsm303DAccelerometer : HardwareSensor<Lsm303DSensor>
     {
         internal Lsm303DAccelerometerDataRate DataRate = Lsm303DAccelerometerDataRate.Rate400Hz;
         internal Lsm303DAccelerometerFilterBandwidth Bandwidth = Lsm303DAccelerometerFilterBandwidth.Bandwidth194Hz;
@@ -13,6 +12,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
         internal bool EnableXAxis = true;
         internal bool EnableYAxis = true;
         internal bool EnableZAxis = true;
+        internal const double Frequency = 400d;
         internal Lsm303DAccelerometer(Lsm303DSensor driver) : base(driver) { }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
             Driver.Device.Write((byte)Lsm303DRegisters.Ctrl2, (byte)reg2);
         }
 
-        private AxisData3<short> ReadAcceleration()
+        internal AxisData3<short> ReadAcceleration()
         {
             var data = new byte[6];
             Driver.Device.Read((byte)((byte)Lsm303DRegisters.OutXlm | 0x80), data);
@@ -47,8 +47,5 @@ namespace ArcSenseController.Sensors.Impl.Lsm303D
                 (short) (data[2] | (data[3] << 8)),
                 (short) (data[4] | (data[5] << 8)));
         }
-
-        public double Frequency => 400d;
-        public AxisData3<short> Acceleration => ReadAcceleration();
     }
 }
